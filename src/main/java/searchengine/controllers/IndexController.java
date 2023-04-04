@@ -18,9 +18,17 @@ public class IndexController {
 
     @GetMapping("/startIndexing")
     public ResponseEntity start() {
-       // if (entityService.isIndexingRun()) {
+        if (indexService.IsIndexingRun()) {
             return ResponseEntity.ok(indexService.startIndexing());
-       // }
-       // return ResponseEntity.badRequest().body("Индексация не запущена");
+        }
+        return ResponseEntity.badRequest().body("Индексация не запущена");
+    }
+
+    @GetMapping("/stopIndexing")
+    public ResponseEntity stop() {
+        if (!indexService.IsIndexingRun()) {
+            return ResponseEntity.ok(indexService.stopIndexing());
+        }
+        return ResponseEntity.badRequest().body("Индексация не запущена");
     }
 }
