@@ -23,4 +23,6 @@ public class Page
     @Type(type = "text")
     private String content;
 
+    public void setId() {
+    }
 }

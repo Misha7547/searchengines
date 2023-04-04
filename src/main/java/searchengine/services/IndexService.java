@@ -2,5 +2,5 @@ package searchengine.services;
 
 public interface IndexService {
 
-    void startIndexing ();
+    Object startIndexing ();
 }
