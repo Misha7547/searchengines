@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Date;
 
 @Getter
@@ -25,4 +26,5 @@ public class Site
     private String lastError;
     private String url;
     private String name;
+
 }

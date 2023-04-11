@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.util.Collection;
+
 @Setter
 @Getter
 @Entity
@@ -22,7 +24,4 @@ public class Page
     private int code;
     @Type(type = "text")
     private String content;
-
-    public void setId() {
-    }
 }

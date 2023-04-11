@@ -1,32 +1,43 @@
 package searchengine.services;
 
-import com.sun.xml.txw2.Document;
-import lombok.Getter;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import searchengine.ParserLinks;
 import searchengine.config.ParserConfig;
-import searchengine.model.Page;
+import searchengine.dto.statistics.DetailedStatisticsItem;
+import searchengine.dto.statistics.StatisticsData;
 import searchengine.model.Site;
+import searchengine.model.Status;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
+@Data
 public class IndexServiceImpl  implements IndexService{
     @Autowired
     ParserConfig parserConfig;
+    @Autowired
+    private EntityService entityService;
 
-    private Boolean isIndexingRun = false;
+    Site site;
+
+    StatisticsData statisticsData;
+
+    private Boolean isIndexingRun = true;
     @Override
     public Object startIndexing() {
-        isIndexingRun = true;
+
+        ArrayList<DetailedStatisticsItem> name = new ArrayList<>(statisticsData.getDetailed());
+        for (DetailedStatisticsItem names: name){
+            entityService.findSiteByName(site,names.getName());
+            entityService.findSiteByUrl(site,names.getUrl());
+            entityService.updateSite(site, Status.valueOf("axx"));
+            entityService.updateLastError(site,"пиздец");
+            return names;
+        }
+
         return null;
     }
 
@@ -40,8 +51,8 @@ public class IndexServiceImpl  implements IndexService{
     public Boolean IsIndexingRun() {
         return isIndexingRun;
     }
-
-
 }
+
+
 
 
