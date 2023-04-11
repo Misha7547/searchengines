@@ -28,14 +28,20 @@ public class IndexServiceImpl  implements IndexService{
     private Boolean isIndexingRun = true;
     @Override
     public Object startIndexing() {
-
-        ArrayList<DetailedStatisticsItem> name = new ArrayList<>(statisticsData.getDetailed());
-        for (DetailedStatisticsItem names: name){
-            entityService.findSiteByName(site,names.getName());
-            entityService.findSiteByUrl(site,names.getUrl());
-            entityService.updateSite(site, Status.valueOf("axx"));
-            entityService.updateLastError(site,"пиздец");
-            return names;
+        
+        try{       
+            ArrayList<DetailedStatisticsItem> name = new ArrayList<>(statisticsData.getDetailed());
+            for (DetailedStatisticsItem names: name){
+                entityService.findSiteByName(site,names.getName());
+                entityService.findSiteByUrl(site,names.getUrl());
+                entityService.updateSite(site, Status.valueOf("axx"));
+                entityService.updateLastError(site,"пиздец");
+                return names;
+            }
+        }
+        catch(e){
+            //тут вывести ошибку в консоль типа print(e);
+            return false;
         }
 
         return null;
