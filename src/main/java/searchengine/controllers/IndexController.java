@@ -1,16 +1,23 @@
 package searchengine.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import searchengine.config.SitesList;
+import searchengine.services.EntityService;
 import searchengine.services.IndexService;
+
 
 @RestController
 @RequestMapping("/api")
 public class IndexController {
+     @Autowired
+     IndexService indexService;
+     @Autowired
+     SitesList sitesList;
+     @Autowired
+    EntityService entityService;
 
-    private final IndexService indexService;
 
     public IndexController (IndexService indexService){
         this.indexService = indexService;
@@ -31,4 +38,5 @@ public class IndexController {
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");
     }
+
 }
