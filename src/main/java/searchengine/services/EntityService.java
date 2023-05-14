@@ -42,12 +42,8 @@ public class EntityService {
     }
 
     public Site updateSite(Site site, Status status) {
-        try {
             site.setStatus(status);
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
-        } catch (Exception e){
-            System.out.println(" ошибка 2 ");
-        }
         return siteRepository.save(site);
     }
 
@@ -58,37 +54,25 @@ public class EntityService {
     }
 
     public Site findSiteByName(Site site, String name) {
-        try {
             site.setName(name);
-        }catch (Exception e){
-            System.out.println("Ошибка 3");
-        }
         return siteRepository.save(site);
     }
 
     public Site findSiteByUrl( Site site,String siteUrl) {
-        try {
             site.setUrl(siteUrl);
-        } catch (Exception e) {
-            System.out.println(" Ошибка 4 ");
-        }
-
         return siteRepository.save(site);
     }
 
-    public void Pars (String url, EntityService entityService) throws SQLException, IOException, ParserConfigurationException, InterruptedException {
-        parseUrl.parsWeb(url, entityService);
+    public void Pars (String url, EntityService entityService, int idSite, Site site)
+            throws SQLException, IOException, ParserConfigurationException, InterruptedException {
+        parseUrl.parsWeb(url, entityService, idSite, site);
     }
 
-   public Page getPage (Page page, String path, int code, String content){
-        try {
+   public Page getPage (Page page, String path, int code, String content, int idSite){
+            page.setId(idSite);
             page.setPath(path);
             page.setCode(code);
             page.setContent(content);
-
-        } catch (Exception e){
-            System.out.println("Ошибка три ");
-        }
        return pageRepository.save(page);
    }
 }

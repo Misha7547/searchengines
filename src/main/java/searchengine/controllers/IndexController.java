@@ -7,6 +7,10 @@ import searchengine.config.SitesList;
 import searchengine.services.EntityService;
 import searchengine.services.IndexService;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.sql.SQLException;
+
 
 @RestController
 @RequestMapping("/api")
@@ -32,7 +36,7 @@ public class IndexController {
     }
 
     @GetMapping("/stopIndexing")
-    public ResponseEntity stop() {
+    public ResponseEntity stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         if (!indexService.IsIndexingRun()) {
             return ResponseEntity.ok(indexService.stopIndexing());
         }

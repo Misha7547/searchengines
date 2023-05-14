@@ -8,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import searchengine.model.Page;
+import searchengine.model.Site;
+import searchengine.model.Status;
 import searchengine.services.EntityService;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ParseUrl {
 
 
-    public static void parsWeb(String url, EntityService entityService)
+    public static void parsWeb(String url, EntityService entityService, int idSite, Site site)
             throws IOException, SQLException, ParserConfigurationException, InterruptedException {
 
         CopyOnWriteArrayList<String> links =new CopyOnWriteArrayList<>();
@@ -35,22 +37,24 @@ public class ParseUrl {
                 Elements postUrl = document.select("a");
                 for (Element post : postUrl) {
                     String linksChildren = post.attr("abs:href");
-                    if(!link.contains(linksChildren)) {
+                    if(!link.contains(linksChildren)
+                            && !linksChildren.contains(url)) {
                         try {
                             Page page = new Page();
                             links.add(linksChildren);
-                            String path = linksChildren;
+                            String path = linksChildren.replaceAll(url," ");
                             int code = urlCode(linksChildren);
-                            entityService.getPage(page,path,code,"Привет");
+                            entityService.getPage(page,path,code, String.valueOf(document),idSite);
                             Thread.sleep(500);
                         } catch (Exception e){
-                            System.out.println("Ошибка в парсе ");
+                            entityService.updateLastError(site," Ошибка в парсинге");
+                            entityService.updateSite(site,Status.FAILED);
                         }
-
                     }
                 }
             }
         }
+        entityService.updateSite(site, Status.INDEXED);
     }
 
     public static int urlCode(String url) throws ParserConfigurationException, SQLException, IOException {

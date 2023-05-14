@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import searchengine.ParseUrl;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
-import searchengine.model.Page;
 import searchengine.model.Status;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -28,17 +27,17 @@ public class IndexServiceImpl  implements IndexService{
     SitesList sitesList;
 
     ParseUrl parseUrl = new ParseUrl();
-
+    ForkJoinPool forkJoinPool = new ForkJoinPool();
     @Override
     public Object startIndexing() {
-
+        isIndexingRun =true;
         entityService.deleteAllSite();
+        entityService.deleteAllPages();
 
       for (Site list: sitesList.getSites()){
-          try {
               CompletableFuture.runAsync(() -> {
                   try {
-                      getSiteAndPage(list.getName(), list.getUrl());
+                      getSiteAndPage(list.getName(), list.getUrl(),isIndexingRun);
                   } catch (SQLException e) {
                       throw new RuntimeException(e);
                   } catch (IOException e) {
@@ -49,17 +48,16 @@ public class IndexServiceImpl  implements IndexService{
                       throw new RuntimeException(e);
                   }
               }, ForkJoinPool.commonPool());
-          } catch (Exception e){
-              System.out.println("Ошибка один");
-          }
       }
         return isIndexingRun;
     }
 
     @Override
-    public Object stopIndexing() {
+    public Object stopIndexing() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         isIndexingRun = false;
-        return null;
+        forkJoinPool.shutdown();
+        getSiteAndPage(null,null,isIndexingRun);
+        return isIndexingRun;
     }
 
     @Override
@@ -67,17 +65,17 @@ public class IndexServiceImpl  implements IndexService{
         return isIndexingRun;
     }
 
-    public  void getSiteAndPage (String name, String url) throws SQLException, IOException, ParserConfigurationException, InterruptedException {
-        try {
-            searchengine.model.Site site = new searchengine.model.Site();
-            Page page  = new Page();
-            entityService.findSiteByName(site,name);
-            entityService.findSiteByUrl(site,url);
-            entityService.updateSite(site,Status.INDEXING);
+    public  void getSiteAndPage (String name, String url,Boolean isIndexingRun ) throws SQLException, IOException, ParserConfigurationException, InterruptedException {
+        searchengine.model.Site site = new searchengine.model.Site();
+        if (isIndexingRun == true) {
+            entityService.findSiteByName(site, name);
+            entityService.findSiteByUrl(site, url);
+            entityService.updateSite(site, Status.INDEXING);
             int idSite = site.getId();
-            entityService.Pars(url,entityService);
-        } catch (Exception e){
-            System.out.println(" Ошибка 2 ");
+            entityService.Pars(url, entityService, idSite, site);
+        } else  if (isIndexingRun ==false){
+            entityService.updateSite(site,Status.FAILED);
+            entityService.updateLastError(site,"Индексация остановлена пользователем");
         }
 
     }
