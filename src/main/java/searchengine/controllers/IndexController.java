@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.config.SitesList;
-import searchengine.services.EntityService;
 import searchengine.services.IndexService;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -19,9 +18,6 @@ public class IndexController {
      IndexService indexService;
      @Autowired
      SitesList sitesList;
-     @Autowired
-    EntityService entityService;
-
 
     public IndexController (IndexService indexService){
         this.indexService = indexService;
@@ -29,7 +25,7 @@ public class IndexController {
 
     @GetMapping("/startIndexing")
     public ResponseEntity start() {
-        if (indexService.IsIndexingRun()) {
+        if (indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.startIndexing());
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");
@@ -37,7 +33,7 @@ public class IndexController {
 
     @GetMapping("/stopIndexing")
     public ResponseEntity stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
-        if (!indexService.IsIndexingRun()) {
+        if (!indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.stopIndexing());
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");

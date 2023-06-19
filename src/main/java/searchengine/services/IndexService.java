@@ -10,5 +10,5 @@ public interface IndexService {
 
     Object stopIndexing() throws SQLException, IOException, ParserConfigurationException, InterruptedException;
 
-    Boolean IsIndexingRun();
+    Boolean isIndexingRun();
 }

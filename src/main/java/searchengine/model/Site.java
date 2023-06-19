@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
-@Table(name="Search_site")
+@Table(name="search_site")
 public class Site
 {
     @Id

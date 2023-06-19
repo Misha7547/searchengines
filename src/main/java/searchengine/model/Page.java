@@ -11,8 +11,8 @@ import java.util.Collection;
 @Setter
 @Getter
 @Entity
-@Table(name="Search_page",
-        indexes = {@Index(name = "Path_INDX", columnList = "path")})
+@Table(name="search_page",
+        indexes = {@Index(name = "path_INDX", columnList = "path")})
 public class Page
 {
     @Id
