@@ -3,24 +3,18 @@ package searchengine.services;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
-import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
-import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.repository.SiteRepository;
 import searchengine.model.Page;
 import searchengine.model.Site;
 import searchengine.model.Status;
-import searchengine.services.PageRepository;
-import searchengine.services.SiteRepository;
+import searchengine.repository.PageRepository;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -49,17 +43,7 @@ public class ParseUrl {
                         links.add(linksChildren);
                         String path = linksChildren.replaceAll(url, " ");
                         int code = urlCode(linksChildren);
-                        try {
-                            setPage(idSite, path, code, String.valueOf(document), pageRepository);
-                            Thread.sleep(500);
-                        } catch (Exception e) {
-                            site.setName(name);
-                            site.setUrl(url);
-                            site.setStatus(Status.FAILED);
-                            site.setLastError(" Ошибка в парсинге");
-                            site.setStatusTime(new Timestamp(System.currentTimeMillis()));
-                            siteRepository.save(site);
-                        }
+                        setPage(idSite, path, code, String.valueOf(document), pageRepository, url, site, siteRepository, name);
                     }
                 }
             }
@@ -77,12 +61,24 @@ public class ParseUrl {
         return code;
     }
 
-    public void setPage(int idSite, String path, int code, String content, PageRepository pageRepository) {
+    public void setPage(int idSite, String path, int code, String content, PageRepository pageRepository,
+                        String url, Site site, SiteRepository siteRepository, String name) {
+
         Page page = new Page();
-        page.setId(idSite);
-        page.setPath(path);
-        page.setCode(code);
-        page.setContent(content);
-        pageRepository.save(page);
+        try {
+            page.setId(idSite);
+            page.setPath(path);
+            page.setCode(code);
+            page.setContent(content);
+            pageRepository.save(page);
+            Thread.sleep(500);
+        } catch (Exception e) {
+            site.setName(name);
+            site.setUrl(url);
+            site.setStatus(Status.FAILED);
+            site.setLastError(" Ошибка в парсинге");
+            site.setStatusTime(new Timestamp(System.currentTimeMillis()));
+            siteRepository.save(site);
+        }
     }
 }

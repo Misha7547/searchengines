@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.repository.PageRepository;
+import searchengine.repository.SiteRepository;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
 import searchengine.model.Status;
@@ -43,7 +45,7 @@ public class IndexServiceImpl implements IndexService {
                 try {
                     getSiteAndPage(list.getName(), list.getUrl(), isIndexingRun);
                 } catch (SQLException | IOException | ParserConfigurationException | InterruptedException e) {
-                    throw new RuntimeException(e);
+                    e.getMessage();
                 }
             }, ForkJoinPool.commonPool());
         }
@@ -76,7 +78,7 @@ public class IndexServiceImpl implements IndexService {
             int idSite = site.getId();
             siteRepository.save(site);
             parseUrl.parsWeb(idSite, url, pageRepository, siteRepository, name);
-        } else if (!isIndexingRun) {
+        } else {
             site.setName(name);
             site.setUrl(url);
             site.setStatus(Status.FAILED);
