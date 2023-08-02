@@ -4,17 +4,17 @@ package searchengine.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
-
 import javax.persistence.*;
-import java.util.Collection;
+
 
 @Setter
 @Getter
 @Entity
-@Table(name="search_page",
-        indexes = {@Index(name = "path_INDX", columnList = "path")})
-public class Page
-{
+@Table(name="search_page")
+
+//@Table(name="search_page",
+//        indexes = {@Index(name = "path_INDX", columnList = "path")})
+public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;

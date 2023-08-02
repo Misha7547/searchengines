@@ -5,15 +5,13 @@ import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.Collection;
 import java.util.Date;
 
 @Getter
 @Setter
 @Entity
 @Table(name="search_site")
-public class Site
-{
+public class Site {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
