@@ -8,6 +8,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+import searchengine.model.Lemma;
+import searchengine.repository.LemmaRepository;
 import searchengine.repository.SiteRepository;
 import searchengine.model.Page;
 import searchengine.model.Site;
@@ -16,6 +18,7 @@ import searchengine.repository.PageRepository;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
@@ -23,7 +26,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 public class ParseUrl {
 
-    public void parsWeb(int idSite, String url, PageRepository pageRepository, SiteRepository siteRepository, String name)
+
+
+    public void parsWeb(int idSite, String url, PageRepository pageRepository, SiteRepository siteRepository,LemmaRepository lemmaRepository, String name)
             throws IOException {
 
         Site site = new Site();
@@ -43,7 +48,7 @@ public class ParseUrl {
                         links.add(linksChildren);
                         String path = linksChildren.replaceAll(url, " ");
                         int code = urlCode(linksChildren);
-                        setPage(idSite, path, code, String.valueOf(document), pageRepository, url, site, siteRepository, name);
+                        setPage(idSite, path, code, String.valueOf(document), pageRepository, url, site, siteRepository, lemmaRepository, name);
                     }
                 }
             }
@@ -62,8 +67,8 @@ public class ParseUrl {
     }
 
     public void setPage(int idSite, String path, int code, String content, PageRepository pageRepository,
-                        String url, Site site, SiteRepository siteRepository, String name) {
-
+                        String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository, String name) throws IOException {
+        Lemmatisator lemmatisator  = new Lemmatisator();
         Page page = new Page();
         try {
             page.setId(idSite);
@@ -72,6 +77,15 @@ public class ParseUrl {
             page.setContent(content);
             pageRepository.save(page);
             Thread.sleep(500);
+            HashMap<String, Integer> wordsMap = new HashMap<>();
+            String clearTegs = lemmatisator.clearingTags(path);
+            wordsMap = lemmatisator.lemmatisator(clearTegs);
+            for (String key : wordsMap.keySet()) {
+                Lemma lemma = new Lemma();
+                lemma.setLemma(key);
+                lemma.setFrequency(wordsMap.get(key));
+                lemmaRepository.save(lemma);
+            }
         } catch (Exception e) {
             site.setName(name);
             site.setUrl(url);

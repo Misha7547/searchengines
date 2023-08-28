@@ -3,6 +3,7 @@ package searchengine.services;
 import org.apache.lucene.morphology.LuceneMorphology;
 import org.apache.lucene.morphology.russian.RussianLuceneMorphology;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class Lemmatisator {
     public Lemmatisator() throws IOException {
     }
 
-    public HashMap<String, Integer> Lemmatisator(String offer) throws IOException {
+    public HashMap<String, Integer> lemmatisator(String offer) throws IOException {
 
         wordsMap = new HashMap<>();
         String text = offer.trim();
@@ -53,8 +54,12 @@ public class Lemmatisator {
         return false;
     }
 
-    public String clearingTags ( String html){
-        String textHtml = Jsoup.parse(html).text();
+    public String clearingTags ( String html) throws IOException {
+        Document document = Jsoup.connect(html)
+                .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                .referrer("http://www.google.com")
+                .get();
+        String textHtml = document.text();
         return textHtml;
     }
 }

@@ -11,4 +11,6 @@ public interface IndexService {
     Object stopIndexing() throws SQLException, IOException, ParserConfigurationException, InterruptedException;
 
     Boolean isIndexingRun();
+
+    void getIndexPage(String html) throws IOException;
 }
