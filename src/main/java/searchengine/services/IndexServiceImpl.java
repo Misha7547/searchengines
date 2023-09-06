@@ -90,9 +90,8 @@ public class IndexServiceImpl implements IndexService {
             site.setUrl(url);
             site.setStatus(Status.INDEXING);
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
-            int idSite = site.getId();
             siteRepository.save(site);
-            parseUrl.parsWeb(idSite, url, pageRepository, siteRepository, lemmaRepository, name);
+            parseUrl.parsWeb(url, pageRepository, siteRepository, lemmaRepository, name,site);
         } else {
             site.setName(name);
             site.setUrl(url);

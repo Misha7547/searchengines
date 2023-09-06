@@ -15,11 +15,11 @@ public class Lemma {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "site_id")
-    private int siteId;
-
     private String lemma;
 
     private int frequency;
 
+    @ManyToOne()
+    @JoinColumn(name = "site_id", referencedColumnName = "id")
+    private Site siteByLemma;
 }

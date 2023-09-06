@@ -18,8 +18,9 @@ public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    @Column(name = "site_id")
-    private int siteId;
+    @ManyToOne()
+    @JoinColumn(name = "site_id", referencedColumnName = "id")
+    private Site siteId;
     private String path;
     private int code;
     @Type(type = "text")

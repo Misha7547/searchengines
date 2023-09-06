@@ -28,10 +28,10 @@ public class ParseUrl {
 
 
 
-    public void parsWeb(int idSite, String url, PageRepository pageRepository, SiteRepository siteRepository,LemmaRepository lemmaRepository, String name)
+    public void parsWeb(String url, PageRepository pageRepository, SiteRepository siteRepository,
+                        LemmaRepository lemmaRepository, String name,Site site)
             throws IOException {
 
-        Site site = new Site();
         CopyOnWriteArrayList<String> links = new CopyOnWriteArrayList<>();
         links.add(url);
         while (!links.isEmpty()) {
@@ -48,7 +48,7 @@ public class ParseUrl {
                         links.add(linksChildren);
                         String path = linksChildren.replaceAll(url, " ");
                         int code = urlCode(linksChildren);
-                        setPage(idSite, path, code, String.valueOf(document), pageRepository, url, site, siteRepository, lemmaRepository, name);
+                        setPage(path, code, String.valueOf(document), pageRepository, url, site, siteRepository, lemmaRepository, name);
                     }
                 }
             }
@@ -66,12 +66,12 @@ public class ParseUrl {
         return code;
     }
 
-    public void setPage(int idSite, String path, int code, String content, PageRepository pageRepository,
+    public void setPage(String path, int code, String content, PageRepository pageRepository,
                         String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository, String name) throws IOException {
         Lemmatisator lemmatisator  = new Lemmatisator();
         Page page = new Page();
         try {
-            page.setId(idSite);
+            page.setSiteId(site);
             page.setPath(path);
             page.setCode(code);
             page.setContent(content);
@@ -82,6 +82,7 @@ public class ParseUrl {
             wordsMap = lemmatisator.lemmatisator(clearTegs);
             for (String key : wordsMap.keySet()) {
                 Lemma lemma = new Lemma();
+                lemma.setSiteByLemma(site);
                 lemma.setLemma(key);
                 lemma.setFrequency(wordsMap.get(key));
                 lemmaRepository.save(lemma);
