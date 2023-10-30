@@ -5,10 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.model.Page;
+import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
@@ -20,7 +24,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -38,6 +45,11 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     LemmaRepository lemmaRepository;
 
+    @Autowired
+    IndexRepository indexRepository;
+
+
+
     private Boolean isIndexingRun = true;
     @Autowired
     SitesList sitesList;
@@ -54,6 +66,7 @@ public class IndexServiceImpl implements IndexService {
         pageRepository.deleteAll();
         siteRepository.deleteAll();
         lemmaRepository.deleteAll();
+        indexRepository.deleteAll();
 
         for (Site list : sitesList.getSites()) {
             CompletableFuture.runAsync(() -> {
@@ -91,7 +104,7 @@ public class IndexServiceImpl implements IndexService {
             site.setStatus(Status.INDEXING);
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
             siteRepository.save(site);
-            parseUrl.parsWeb(url, pageRepository, siteRepository, lemmaRepository, name,site);
+            parseUrl.parsWeb(url, pageRepository, siteRepository, indexRepository, lemmaRepository,name,site);
         } else {
             site.setName(name);
             site.setUrl(url);
@@ -103,8 +116,10 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public void getIndexPage(String html) throws IOException {
+    public Object getIndexPage(String html, searchengine.model.Site site) throws IOException {
         Page page = new Page();
+        site.setName(html);
+        page.setSiteId(site);
         page.setPath(html);
         page.setCode(urlCode(html));
         page.setContent(String.valueOf(document = Jsoup.connect(html).get()));
@@ -113,12 +128,18 @@ public class IndexServiceImpl implements IndexService {
         wordsMap = lemmatisator.lemmatisator(clearTegs);
         for (String key : wordsMap.keySet()) {
             Lemma lemma = new Lemma();
+            Index index = new Index();
+            lemma.setSiteByLemma(site);
             lemma.setLemma(key);
             lemma.setFrequency(wordsMap.get(key));
+            index.setLemmaId(lemma);
+            index.setPageId(page);
             lemmaRepository.save(lemma);
+            indexRepository.save(index);
         }
 
         pageRepository.save(page);
+        return null;
     }
 
     public static int urlCode(String url) {
@@ -131,6 +152,7 @@ public class IndexServiceImpl implements IndexService {
         }
         return code;
     }
+
 }
 
 

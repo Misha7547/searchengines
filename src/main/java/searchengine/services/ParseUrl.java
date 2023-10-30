@@ -8,12 +8,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import searchengine.model.Lemma;
+import searchengine.model.*;
+import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.SiteRepository;
-import searchengine.model.Page;
-import searchengine.model.Site;
-import searchengine.model.Status;
 import searchengine.repository.PageRepository;
 
 import java.io.IOException;
@@ -27,8 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ParseUrl {
 
 
-
-    public void parsWeb(String url, PageRepository pageRepository, SiteRepository siteRepository,
+    public void parsWeb(String url, PageRepository pageRepository, SiteRepository siteRepository, IndexRepository indexRepository,
                         LemmaRepository lemmaRepository, String name,Site site)
             throws IOException {
 
@@ -48,7 +45,8 @@ public class ParseUrl {
                         links.add(linksChildren);
                         String path = linksChildren.replaceAll(url, " ");
                         int code = urlCode(linksChildren);
-                        setPage(path, code, String.valueOf(document), pageRepository, url, site, siteRepository, lemmaRepository, name);
+                        setPage(path, code, String.valueOf(document), pageRepository, url,
+                                site, siteRepository, lemmaRepository, indexRepository, name);
                     }
                 }
             }
@@ -67,7 +65,8 @@ public class ParseUrl {
     }
 
     public void setPage(String path, int code, String content, PageRepository pageRepository,
-                        String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository, String name) throws IOException {
+                        String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository,
+                        IndexRepository indexRepository,String name) throws IOException {
         Lemmatisator lemmatisator  = new Lemmatisator();
         Page page = new Page();
         try {
@@ -86,6 +85,7 @@ public class ParseUrl {
                 lemma.setLemma(key);
                 lemma.setFrequency(wordsMap.get(key));
                 lemmaRepository.save(lemma);
+                indexSet(lemma,page,indexRepository);
             }
         } catch (Exception e) {
             site.setName(name);
@@ -95,5 +95,13 @@ public class ParseUrl {
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
             siteRepository.save(site);
         }
+    }
+
+    public IndexRepository indexSet(Lemma lemma, Page page, IndexRepository indexRepository){
+        Index index = new Index();
+        index.setLemmaId(lemma);
+        index.setPageId(page);
+        indexRepository.save(index);
+        return indexRepository;
     }
 }

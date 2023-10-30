@@ -1,5 +1,7 @@
 package searchengine.services;
 
+import searchengine.model.Site;
+
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,5 +14,6 @@ public interface IndexService {
 
     Boolean isIndexingRun();
 
-    void getIndexPage(String html) throws IOException;
+
+    Object getIndexPage(String html, Site site) throws IOException;
 }

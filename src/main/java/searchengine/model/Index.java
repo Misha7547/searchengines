@@ -15,11 +15,13 @@ public class Index {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @Column(name = "page_id")
-    private int pageId;
+    @ManyToOne()
+    @JoinColumn(name = "page_id", referencedColumnName = "id")
+    private Page pageId;
 
-    @Column(name = "lemma_id")
-    private int lemmaId;
+    @ManyToOne()
+    @JoinColumn(name = "lemma_id", referencedColumnName = "id")
+    private Lemma lemmaId;
 
-    private float rank;
+//    private float rank;
 }
