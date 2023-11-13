@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.model.Index;
@@ -24,10 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -48,8 +43,6 @@ public class IndexServiceImpl implements IndexService {
     @Autowired
     IndexRepository indexRepository;
 
-
-
     private Boolean isIndexingRun = true;
     @Autowired
     SitesList sitesList;
@@ -60,8 +53,10 @@ public class IndexServiceImpl implements IndexService {
     Lemmatisator lemmatisator;
     private Document document;
 
+    private Boolean checkSite;
+
     @Override
-    public Object startIndexing() {
+    public Boolean startIndexing() {
         isIndexingRun = true;
         pageRepository.deleteAll();
         siteRepository.deleteAll();
@@ -81,7 +76,7 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Object stopIndexing()
+    public Boolean stopIndexing()
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         isIndexingRun = false;
         forkJoinPool.shutdown();
@@ -93,6 +88,7 @@ public class IndexServiceImpl implements IndexService {
     public Boolean isIndexingRun() {
         return isIndexingRun;
     }
+
 
     public void getSiteAndPage(String name, String url, Boolean isIndexingRun)
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
@@ -116,8 +112,9 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Object getIndexPage(String html, searchengine.model.Site site) throws IOException {
+    public Object getIndexPage(String html) throws IOException {
         Page page = new Page();
+        searchengine.model.Site site = new searchengine.model.Site();
         site.setName(html);
         page.setSiteId(site);
         page.setPath(html);
@@ -137,7 +134,6 @@ public class IndexServiceImpl implements IndexService {
             lemmaRepository.save(lemma);
             indexRepository.save(index);
         }
-
         pageRepository.save(page);
         return null;
     }
@@ -151,6 +147,19 @@ public class IndexServiceImpl implements IndexService {
             code = 404;
         }
         return code;
+    }
+
+    @Override
+    public Boolean checkSite(String html){
+
+        for (Site list : sitesList.getSites()){
+            if (html.contains((CharSequence) list)){
+                checkSite = true;
+            } else {
+                checkSite = false;
+            }
+        }
+        return checkSite;
     }
 
 }

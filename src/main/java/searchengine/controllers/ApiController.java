@@ -53,19 +53,10 @@ public class ApiController {
 
     @PostMapping("/indexPage")
     public ResponseEntity<Object> getPage(@RequestParam(name = "url") String url) throws IOException{
-        if (!indexService.isIndexingRun()) {
-            ArrayList<Site> sites = siteConfig.getSites();
-            for (Site site : sites) {
-                if (url.toLowerCase().contains(site.getUrl())) {
-                    if (url.equals(site)) {
-                        return ResponseEntity.ok(indexService.getIndexPage(url,site));
-                    } else {
-                        return ResponseEntity.badRequest().body("Станица не найдена");
-                    }
-                }
-            }
-        }
-        return ResponseEntity.badRequest().body("Данная страница находится " +
-                "за пределами сайтов,указаных в конфигурационном файле.");
+      if(indexService.checkSite(url)){
+          return ResponseEntity.ok(indexService.getIndexPage(url));
+      }
+      return ResponseEntity.badRequest().body("Данная страница находится за пределами сайтов, \n" +
+              "указанных в конфигурационном файле\n");
     }
 }

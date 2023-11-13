@@ -14,6 +14,7 @@ public interface IndexService {
 
     Boolean isIndexingRun();
 
+    Object getIndexPage(String html) throws IOException;
 
-    Object getIndexPage(String html, Site site) throws IOException;
+    Boolean checkSite(String html);
 }
