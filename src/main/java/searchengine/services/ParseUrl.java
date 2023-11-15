@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.model.*;
 import searchengine.repository.IndexRepository;
@@ -17,6 +18,8 @@ import searchengine.repository.PageRepository;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
@@ -24,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 public class ParseUrl {
 
+    public ListPage listPage = new ListPage();
+    public ListLemma listLemma = new ListLemma();
 
     public void parsWeb(String url, PageRepository pageRepository, SiteRepository siteRepository, IndexRepository indexRepository,
                         LemmaRepository lemmaRepository, String name,Site site)
@@ -69,12 +74,16 @@ public class ParseUrl {
                         IndexRepository indexRepository,String name) throws IOException {
         Lemmatisator lemmatisator  = new Lemmatisator();
         Page page = new Page();
+        List < Page> pages = new LinkedList<>();
+        List < Lemma> lemmas = new LinkedList<>();
         try {
             page.setSiteId(site);
             page.setPath(path);
             page.setCode(code);
             page.setContent(content);
             pageRepository.save(page);
+            pages.add(page);
+            setListPage(pages);
             Thread.sleep(500);
             HashMap<String, Integer> wordsMap = new HashMap<>();
             String clearTegs = lemmatisator.clearingTags(path);
@@ -86,6 +95,8 @@ public class ParseUrl {
                 lemma.setFrequency(wordsMap.get(key));
                 lemmaRepository.save(lemma);
                 indexSet(lemma,page,indexRepository);
+                lemmas.add(lemma);
+                setListLemma(lemmas);
             }
         } catch (Exception e) {
             site.setName(name);
@@ -95,6 +106,7 @@ public class ParseUrl {
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
             siteRepository.save(site);
         }
+
     }
 
     public IndexRepository indexSet(Lemma lemma, Page page, IndexRepository indexRepository){
@@ -104,4 +116,16 @@ public class ParseUrl {
         indexRepository.save(index);
         return indexRepository;
     }
+
+    public ListPage setListPage (List list){
+
+       listPage.setListPage(list);
+        return listPage;
+    }
+
+    public ListLemma setListLemma (List list){
+        listLemma.setLemmaList(list);
+        return listLemma;
+    }
+
 }
