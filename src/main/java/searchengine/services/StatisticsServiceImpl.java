@@ -1,6 +1,7 @@
 package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
@@ -8,26 +9,32 @@ import searchengine.dto.statistics.DetailedStatisticsItem;
 import searchengine.dto.statistics.StatisticsData;
 import searchengine.dto.statistics.StatisticsResponse;
 import searchengine.dto.statistics.TotalStatistics;
+import searchengine.model.Lemma;
+import searchengine.model.Page;
+import searchengine.repository.LemmaRepository;
+import searchengine.repository.PageRepository;
+import searchengine.repository.SiteRepository;
+
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Random;
+
 
 @Service
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final Random random = new Random();
     private final SitesList sites;
+    @Autowired
+    private final SiteRepository siteRepository;
+    @Autowired
+    private final PageRepository pageRepository;
+    @Autowired
+    private final LemmaRepository lemmaRepository;
 
     @Override
     public StatisticsResponse getStatistics() {
-        String[] statuses = { "INDEXED", "FAILED", "INDEXING" };
-        String[] errors = {
-                "Ошибка индексации: главная страница сайта не доступна",
-                "Ошибка индексации: сайт не доступен",
-                ""
-        };
 
         TotalStatistics total = new TotalStatistics();
         total.setSites(sites.getSites().size());
@@ -37,17 +44,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<Site> sitesList = sites.getSites();
         for(int i = 0; i < sitesList.size(); i++) {
             Site site = sitesList.get(i);
+            List<Page> pageList = pageList(site.getUrl());
+            List<Lemma> lemmaList = lemmas(site.getUrl());
             DetailedStatisticsItem item = new DetailedStatisticsItem();
             item.setName(site.getName());
             item.setUrl(site.getUrl());
-            int pages = random.nextInt(1_000);
-            int lemmas = pages * random.nextInt(1_000);
+            int pages = pageList.size();
+            int lemmas = lemmaList.size();
             item.setPages(pages);
             item.setLemmas(lemmas);
-            item.setStatus(statuses[i % 3]);
-            item.setError(errors[i % 3]);
-            item.setStatusTime(System.currentTimeMillis() -
-                    (random.nextInt(10_000)));
+            item.setStatus(statusSite(site.getUrl()));
+            item.setError(errorSite(site.getUrl()));
+            item.setStatusTime(System.currentTimeMillis() - statusTimeSite(site.getUrl()));
             total.setPages(total.getPages() + pages);
             total.setLemmas(total.getLemmas() + lemmas);
             detailed.add(item);
@@ -60,5 +68,77 @@ public class StatisticsServiceImpl implements StatisticsService {
         response.setStatistics(data);
         response.setResult(true);
         return response;
+    }
+
+    public List<Page> pageList(String urlSite){
+        List<Page> listPages = (List<Page>) pageRepository.findAll();
+        List<Page> listPage = new ArrayList<>();
+                int i = idSite(urlSite);
+                for (Page page: listPages){
+                    int x = page.getSiteId().getId();
+                    if(x == i){
+                        listPage.add(page);
+                    }
+                }
+        return listPage;
+    }
+
+    public List<Lemma> lemmas(String urlSite){
+        List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
+        List<Lemma> listLemma = new ArrayList<>();
+        int i = idSite(urlSite);
+        for (Lemma lemma:listLemmas){
+            int x = lemma.getSiteByLemma().getId();
+            if(x == i){
+                listLemma.add(lemma);
+            }
+        }
+        return listLemma;
+    }
+
+    public String statusSite (String urlSite){
+        String statusSite = null;
+        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
+        for (searchengine.model.Site site: listsites){
+            if(urlSite.contains(site.getUrl())){
+                statusSite = site.getStatus().toString();
+            }
+        }
+        return statusSite;
+    }
+
+    public String errorSite (String urlSite){
+        String errorSite = null;
+        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
+        for (searchengine.model.Site site: listsites){
+            if(urlSite.contains(site.getUrl())){
+                errorSite = site.getLastError();
+            }
+        }
+        return errorSite;
+    }
+
+    public long statusTimeSite (String urlSite){
+        long dateMillis = 0;
+        Date date;
+        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
+        for (searchengine.model.Site site: listsites){
+            if(urlSite.contains(site.getUrl())){
+                date = site.getStatusTime();
+                dateMillis = date.getTime();
+            }
+        }
+        return dateMillis;
+    }
+
+    public int  idSite(String urlSite){
+        int i = 0;
+        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
+        for (searchengine.model.Site site: listsites){
+            if(urlSite.contains(site.getUrl())){
+               i = site.getId();
+            }
+        }
+      return i;
     }
 }

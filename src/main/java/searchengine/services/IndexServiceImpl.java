@@ -131,6 +131,7 @@ public class IndexServiceImpl implements IndexService {
             lemma.setFrequency(wordsMap.get(key));
             index.setLemmaId(lemma);
             index.setPageId(page);
+            index.setRank(wordsMap.get(key));
             lemmaRepository.save(lemma);
             indexRepository.save(index);
         }

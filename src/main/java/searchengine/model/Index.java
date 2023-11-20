@@ -23,6 +23,6 @@ public class Index {
     @JoinColumn(name = "lemma_id", referencedColumnName = "id")
     private Lemma lemmaId;
 
-//    @Column(name = "rank_lemma")
-//    private float rank;
+    @Column(name = "rank_lemma")
+    private Integer rank;
 }

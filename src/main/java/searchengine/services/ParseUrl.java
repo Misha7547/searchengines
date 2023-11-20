@@ -85,7 +85,8 @@ public class ParseUrl {
                 lemma.setLemma(key);
                 lemma.setFrequency(wordsMap.get(key));
                 lemmaRepository.save(lemma);
-                indexSet(lemma,page,indexRepository);
+                int i = wordsMap.get(key);
+                indexSet(lemma,page,indexRepository, i);
             }
         } catch (Exception e) {
             site.setName(name);
@@ -97,8 +98,9 @@ public class ParseUrl {
         }
     }
 
-    public IndexRepository indexSet(Lemma lemma, Page page, IndexRepository indexRepository){
+    public IndexRepository indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
         Index index = new Index();
+        index.setRank(i);
         index.setLemmaId(lemma);
         index.setPageId(page);
         indexRepository.save(index);
