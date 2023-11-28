@@ -32,6 +32,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final PageRepository pageRepository;
     @Autowired
     private final LemmaRepository lemmaRepository;
+    private String statusSite = null;
+    private String errorSite = null;
+    private long dateMillis = 0;
+    private Date date;
+    private int idI;
 
     @Override
     public StatisticsResponse getStatistics() {
@@ -44,8 +49,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<Site> sitesList = sites.getSites();
         for(int i = 0; i < sitesList.size(); i++) {
             Site site = sitesList.get(i);
-            List<Page> pageList = pageList(site.getUrl());
-            List<Lemma> lemmaList = lemmas(site.getUrl());
+            infoSite(site.getUrl());
+            List<Page> pageList = pageList();
+            List<Lemma> lemmaList = lemmas();
             DetailedStatisticsItem item = new DetailedStatisticsItem();
             item.setName(site.getName());
             item.setUrl(site.getUrl());
@@ -53,9 +59,9 @@ public class StatisticsServiceImpl implements StatisticsService {
             int lemmas = lemmaList.size();
             item.setPages(pages);
             item.setLemmas(lemmas);
-            item.setStatus(statusSite(site.getUrl()));
-            item.setError(errorSite(site.getUrl()));
-            item.setStatusTime(System.currentTimeMillis() - statusTimeSite(site.getUrl()));
+            item.setStatus(statusSite);
+            item.setError(errorSite);
+            item.setStatusTime(System.currentTimeMillis() - dateMillis);
             total.setPages(total.getPages() + pages);
             total.setLemmas(total.getLemmas() + lemmas);
             detailed.add(item);
@@ -70,10 +76,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         return response;
     }
 
-    public List<Page> pageList(String urlSite){
+    public List<Page> pageList(){
         List<Page> listPages = (List<Page>) pageRepository.findAll();
         List<Page> listPage = new ArrayList<>();
-                int i = idSite(urlSite);
+                int i = idI;
                 for (Page page: listPages){
                     int x = page.getSiteId().getId();
                     if(x == i){
@@ -83,10 +89,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         return listPage;
     }
 
-    public List<Lemma> lemmas(String urlSite){
+    public List<Lemma> lemmas(){
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listLemma = new ArrayList<>();
-        int i = idSite(urlSite);
+        int i = idI;
         for (Lemma lemma:listLemmas){
             int x = lemma.getSiteByLemma().getId();
             if(x == i){
@@ -96,49 +102,16 @@ public class StatisticsServiceImpl implements StatisticsService {
         return listLemma;
     }
 
-    public String statusSite (String urlSite){
-        String statusSite = null;
+    public void   infoSite(String urlSite){
         List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
         for (searchengine.model.Site site: listsites){
             if(urlSite.contains(site.getUrl())){
-                statusSite = site.getStatus().toString();
+               idI = site.getId();
+               statusSite = site.getStatus().toString();
+               errorSite = site.getLastError();
+               date = site.getStatusTime();
+               dateMillis = date.getTime();
             }
         }
-        return statusSite;
-    }
-
-    public String errorSite (String urlSite){
-        String errorSite = null;
-        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
-        for (searchengine.model.Site site: listsites){
-            if(urlSite.contains(site.getUrl())){
-                errorSite = site.getLastError();
-            }
-        }
-        return errorSite;
-    }
-
-    public long statusTimeSite (String urlSite){
-        long dateMillis = 0;
-        Date date;
-        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
-        for (searchengine.model.Site site: listsites){
-            if(urlSite.contains(site.getUrl())){
-                date = site.getStatusTime();
-                dateMillis = date.getTime();
-            }
-        }
-        return dateMillis;
-    }
-
-    public int  idSite(String urlSite){
-        int i = 0;
-        List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
-        for (searchengine.model.Site site: listsites){
-            if(urlSite.contains(site.getUrl())){
-               i = site.getId();
-            }
-        }
-      return i;
     }
 }
