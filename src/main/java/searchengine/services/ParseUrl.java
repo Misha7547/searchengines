@@ -17,6 +17,7 @@ import searchengine.repository.PageRepository;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
@@ -80,13 +81,7 @@ public class ParseUrl {
             String clearTegs = lemmatisator.clearingTags(path);
             wordsMap = lemmatisator.lemmatisator(clearTegs);
             for (String key : wordsMap.keySet()) {
-                Lemma lemma = new Lemma();
-                lemma.setSiteByLemma(site);
-                lemma.setLemma(key);
-                lemma.setFrequency(wordsMap.get(key));
-                lemmaRepository.save(lemma);
-                int i = wordsMap.get(key);
-                indexSet(lemma,page,indexRepository, i);
+                setLemma(lemmaRepository,key,site,page, wordsMap.get(key),indexRepository);
             }
         } catch (Exception e) {
             site.setName(name);
@@ -105,5 +100,35 @@ public class ParseUrl {
         index.setPageId(page);
         indexRepository.save(index);
         return indexRepository;
+    }
+
+    public  void  setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
+        List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
+        if(listLemmas.size() == 0) {
+            Lemma lemma = new Lemma();
+            lemma.setSiteByLemma(site);
+            lemma.setLemma(key);
+            lemma.setFrequency(1);
+            lemmaRepository.save(lemma);
+            indexSet(lemma, page, indexRepository, i);
+        } else{
+            for (Lemma lemma : listLemmas) {
+                if (key.equals(lemma.getLemma())) {
+                    Lemma lemmaSave = lemmaRepository.findById(lemma.getId()).orElseThrow();
+                    lemmaSave.setFrequency(lemma.getFrequency() +1);
+                    lemmaRepository.save(lemmaSave);
+                    indexSet(lemmaSave,page,indexRepository,i);
+                    break;
+                } else  {
+                    Lemma lemmas = new Lemma();
+                    lemmas.setSiteByLemma(site);
+                    lemmas.setLemma(key);
+                    lemmas.setFrequency(1);
+                    lemmaRepository.save(lemmas);
+                    indexSet(lemmas,page,indexRepository, i);
+                    break;
+                }
+            }
+        }
     }
 }

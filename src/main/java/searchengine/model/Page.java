@@ -12,8 +12,6 @@ import javax.persistence.*;
 @Entity
 @Table(name="search_page")
 
-//@Table(name="search_page",
-//        indexes = {@Index(name = "path_INDX", columnList = "path")})
 public class Page {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

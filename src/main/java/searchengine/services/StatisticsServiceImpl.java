@@ -14,6 +14,7 @@ import searchengine.model.Page;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
+import searchengine.repository.StatisticsService;
 
 
 import java.util.ArrayList;

@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.model.Site;
 import searchengine.model.SiteConfig;
-import searchengine.services.IndexService;
-import searchengine.services.StatisticsService;
+import searchengine.repository.IndexService;
+import searchengine.repository.StatisticsService;
+import searchengine.services.SearchService;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api")
@@ -23,11 +22,13 @@ public class ApiController {
 
     private final StatisticsService statisticsService;
     private final IndexService indexService;
+    private final SearchService searchService;
 
 
-    public ApiController(StatisticsService statisticsService, IndexService indexService) {
+    public ApiController(StatisticsService statisticsService, IndexService indexService, SearchService searchService) {
         this.statisticsService = statisticsService;
         this.indexService = indexService;
+        this.searchService = searchService;
     }
 
     @GetMapping("/statistics")
@@ -58,5 +59,13 @@ public class ApiController {
       }
       return ResponseEntity.badRequest().body("Данная страница находится за пределами сайтов, \n" +
               "указанных в конфигурационном файле\n");
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity  <Object> search (@RequestParam(value = "query") String query) throws IOException {
+        if (!query.equals(null)){
+            return ResponseEntity.ok(searchService.search(query));
+        }
+        return ResponseEntity.badRequest().body("Задан пустой поисковый запрос");
     }
 }
