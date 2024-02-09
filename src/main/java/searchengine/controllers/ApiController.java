@@ -62,9 +62,9 @@ public class ApiController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity  <Object> search (@RequestParam(value = "query") String query) throws IOException {
+    public ResponseEntity  <Object> search (@RequestParam(value = "query") String query,  @RequestParam(value = "site", required = false) String site) throws IOException {
         if (!query.equals(null)){
-            return ResponseEntity.ok(searchService.search(query));
+            return ResponseEntity.ok(searchService.search(query,site));
         }
         return ResponseEntity.badRequest().body("Задан пустой поисковый запрос");
     }

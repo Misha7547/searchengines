@@ -93,17 +93,17 @@ public class ParseUrl {
         }
     }
 
-    public IndexRepository indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
+    public void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
         Index index = new Index();
         index.setRank(i);
         index.setLemmaId(lemma);
         index.setPageId(page);
         indexRepository.save(index);
-        return indexRepository;
     }
 
     public  void  setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
+        boolean сheck = true;
         if(listLemmas.size() == 0) {
             Lemma lemma = new Lemma();
             lemma.setSiteByLemma(site);
@@ -118,16 +118,17 @@ public class ParseUrl {
                     lemmaSave.setFrequency(lemma.getFrequency() +1);
                     lemmaRepository.save(lemmaSave);
                     indexSet(lemmaSave,page,indexRepository,i);
-                    break;
-                } else  {
-                    Lemma lemmas = new Lemma();
-                    lemmas.setSiteByLemma(site);
-                    lemmas.setLemma(key);
-                    lemmas.setFrequency(1);
-                    lemmaRepository.save(lemmas);
-                    indexSet(lemmas,page,indexRepository, i);
+                    сheck = false;
                     break;
                 }
+            }
+            if(сheck) {
+                Lemma lemmas = new Lemma();
+                lemmas.setSiteByLemma(site);
+                lemmas.setLemma(key);
+                lemmas.setFrequency(1);
+                lemmaRepository.save(lemmas);
+                indexSet(lemmas, page, indexRepository, i);
             }
         }
     }
