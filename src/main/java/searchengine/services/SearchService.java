@@ -6,12 +6,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.dto.statistics.DateResponse;
 import searchengine.dto.statistics.ResultSearch;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.repository.IndexRepository;
 import searchengine.repository.LemmaRepository;
-import searchengine.repository.SiteRepository;
+
 
 import java.io.IOException;
 import java.util.*;
@@ -33,6 +34,9 @@ public class SearchService {
         HashMap<String, Integer> wordsMap =lemmatisator.lemmatisator(query);
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listSortedLemma = new ArrayList<>();
+        List<Index> listIndexAll = (List<Index>) indexRepository.findAll();
+        List<Index> listIndex = new ArrayList<>();
+        Object resultSearch;
 
         for (String key : wordsMap.keySet()) {
             if (wordsMap.get(key) > 8 ){
@@ -41,9 +45,6 @@ public class SearchService {
             searchLemma(key, listLemmas,listSortedLemma);
         }
 
-        List<Index> listIndexAll = (List<Index>) indexRepository.findAll();
-        List<Index> listIndex = new ArrayList<>();
-
         for (int i = 0; i < listSortedLemma.size(); i++ ){
             if(i > 0 && listIndex.size() == 0){
                 break;
@@ -51,49 +52,25 @@ public class SearchService {
             searchIndex(listSortedLemma.get(i),listIndexAll,listIndex);
         }
 
-        if( siteUrl != null){
-            List <Index> numberIndex =new ArrayList<>();
-            for( Index index :listIndex){
-                int j = 0;
-                if(index.getPageId().getSiteId().getUrl().equals(siteUrl)){
-                    j++;
-                    System.out.println(index.getId());
-                }
-                if (j == 0)
-                    numberIndex.add(index);
-            }
-            for (Index j : numberIndex){
-                listIndex.remove(j);
-            }
-        }
-        Object resultSearch = null;
+        checkSite(siteUrl,listIndex);
 
         if(listIndex.size() == 0){
-
+            ResultSearch result=new ResultSearch();
+            resultSearch = getDataResponse(listIndex,result);
         } else {
 
             HashMap <Index, Integer> absoluteRelevanceList = new HashMap<>();
+            HashMap <Index, Double> relativeRelevanceList = new HashMap<>();
+
             for ( Index index:listIndex){
                 absoluteRelevance(index,listIndexAll, listSortedLemma,absoluteRelevanceList);
             }
 
-            HashMap <Index, Double> relativeRelevanceList = new HashMap<>();
             double max = Collections.max(absoluteRelevanceList.values());
-            double relativeRelevances;
-
-            for ( Index index: absoluteRelevanceList.keySet()){
-            relativeRelevances = (double) absoluteRelevanceList.get(index)  /  max;
-            relativeRelevanceList.put(index,relativeRelevances);
-            }
-
+            countRelative(absoluteRelevanceList, relativeRelevanceList,max);
             List < Map.Entry<Index,Double>> list = new LinkedList<Map.Entry<Index, Double>>(relativeRelevanceList.entrySet());
-            Collections.sort(list, new Comparator<Map.Entry<Index, Double>>() {
-                @Override
-                public int compare(Map.Entry<Index, Double> o1, Map.Entry<Index, Double> o2) {
-                    return o2.getValue().compareTo(o1.getValue());
-                }
-            });
-            resultSearch = createSearchResult(list,query);
+            sort(list);
+            resultSearch = createSearchResult(list,query,listIndex);
         }
         return resultSearch ;
     }
@@ -116,19 +93,11 @@ public class SearchService {
     public void searchIndex (Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
 
         if (listIndex.size() == 0 ){
-            for (Index index: listIndexAll){
-                if(lemma.getId() == index.getLemmaId().getId())
-                    listIndex.add(index);
-            }
+            getIndexOne(lemma,listIndexAll,listIndex);
         } else {
             List <Index> numberIndex =new ArrayList<>();
             for (int i = 0; i < listIndex.size(); i++){
-                int j = 0;
-                for (Index indexs: listIndexAll){
-                    if(indexs.getPageId() == listIndex.get(i).getPageId()
-                            && lemma.getLemma().equals(indexs.getLemmaId().getLemma()))
-                        j++;
-                }
+                int j= deleteIndex( i ,lemma, listIndexAll, listIndex);
                 if (j == 0)
                 numberIndex.add(listIndex.get(i));
             }
@@ -152,9 +121,10 @@ public class SearchService {
         absoluteRelevanceList.put(index,g);
     }
 
-    private List<ResultSearch> createSearchResult(List < Map.Entry<Index,Double>> list, String query  ) throws IOException {
+    private List<DateResponse> createSearchResult(List < Map.Entry<Index,Double>> list,
+                                                  String query, List<Index> listIndex) throws IOException {
 
-        List<ResultSearch> searchResult = new ArrayList<>();
+        List<DateResponse> searchResult = new ArrayList<>();
 
         for (Map.Entry<Index, Double> index: list){
 
@@ -166,8 +136,74 @@ public class SearchService {
             resultSearch.setTitle(document.title());
             resultSearch.setSnippet(lemmatisator.getSnippet(index.getKey().getPageId().getContent(), query));
             resultSearch.setRelevance(index.getValue());
-            searchResult.add(resultSearch);
+            DateResponse dateResponse = getDataResponse(listIndex,resultSearch);
+            searchResult.add(dateResponse);
         }
         return searchResult;
+    }
+
+    public void countRelative ( HashMap <Index, Integer> absoluteRelevanceList,
+                                HashMap <Index, Double> relativeRelevanceList, double max){
+        double relativeRelevances;
+
+        for ( Index index: absoluteRelevanceList.keySet()){
+            relativeRelevances = (double) absoluteRelevanceList.get(index)  /  max;
+            relativeRelevanceList.put(index,relativeRelevances);
+        }
+    }
+
+    public void sort (List < Map.Entry<Index,Double>> list){
+
+        Collections.sort(list, new Comparator<Map.Entry<Index, Double>>() {
+            @Override
+            public int compare(Map.Entry<Index, Double> o1, Map.Entry<Index, Double> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+    }
+
+    public DateResponse getDataResponse (List<Index> listIndex, ResultSearch result){
+
+        DateResponse dateResponse =new DateResponse();
+        dateResponse.setResult(true);
+        dateResponse.setCount(listIndex.size());
+        dateResponse.setResultSearch(result);
+
+        return dateResponse;
+    }
+
+    public void checkSite ( String siteUrl, List<Index> listIndex){
+
+        if( siteUrl != null){
+            List <Index> numberIndex =new ArrayList<>();
+            for( Index index :listIndex){
+                int j = 0;
+                if(index.getPageId().getSiteId().getUrl().equals(siteUrl))
+                    j++;
+                if (j == 0)
+                    numberIndex.add(index);
+            }
+            for (Index j : numberIndex){
+                listIndex.remove(j);
+            }
+        }
+    }
+
+    public void getIndexOne(Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
+
+        for (Index index: listIndexAll){
+            if(lemma.getId() == index.getLemmaId().getId())
+                listIndex.add(index);
+        }
+    }
+
+    public int deleteIndex(int i , Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
+        int j = 0;
+        for (Index indexs: listIndexAll){
+            if(indexs.getPageId() == listIndex.get(i).getPageId()
+                    && lemma.getLemma().equals(indexs.getLemmaId().getLemma()))
+                j++;
+        }
+        return j;
     }
 }

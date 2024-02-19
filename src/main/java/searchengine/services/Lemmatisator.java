@@ -28,7 +28,7 @@ public class Lemmatisator {
     public Lemmatisator() throws IOException {
     }
 
-    public HashMap<String, Integer> lemmatisator(String offer) throws IOException {
+    public HashMap<String, Integer> lemmatisator(String offer){
 
         wordsMap = new HashMap<>();
         String text = offer.trim();

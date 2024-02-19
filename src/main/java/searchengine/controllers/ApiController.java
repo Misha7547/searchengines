@@ -1,10 +1,9 @@
 package searchengine.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.model.SiteConfig;
 import searchengine.repository.IndexService;
 import searchengine.repository.StatisticsService;
 import searchengine.services.SearchService;
@@ -17,8 +16,6 @@ import java.sql.SQLException;
 @RequestMapping("/api")
 public class ApiController {
 
-    @Autowired
-    SiteConfig siteConfig;
 
     private final StatisticsService statisticsService;
     private final IndexService indexService;
@@ -63,7 +60,7 @@ public class ApiController {
 
     @GetMapping("/search")
     public ResponseEntity  <Object> search (@RequestParam(value = "query") String query,  @RequestParam(value = "site", required = false) String site) throws IOException {
-        if (!query.equals(null)){
+        if (query != null){
             return ResponseEntity.ok(searchService.search(query,site));
         }
         return ResponseEntity.badRequest().body("Задан пустой поисковый запрос");
