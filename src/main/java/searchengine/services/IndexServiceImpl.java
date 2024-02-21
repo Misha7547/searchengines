@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import searchengine.dto.statistics.ResultParseIndex;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.model.Page;
@@ -53,12 +54,15 @@ public class IndexServiceImpl implements IndexService {
     private Boolean checkSite;
 
     @Override
-    public Boolean startIndexing() {
+    public Object startIndexing() throws InterruptedException {
         isIndexingRun = true;
         pageRepository.deleteAll();
         siteRepository.deleteAll();
         lemmaRepository.deleteAll();
         indexRepository.deleteAll();
+
+        ResultParseIndex resultParseIndex = new ResultParseIndex();
+        resultParseIndex.setResult(isIndexingRun);
 
         for (Site list : sitesList.getSites()) {
             CompletableFuture.runAsync(() -> {
@@ -69,23 +73,28 @@ public class IndexServiceImpl implements IndexService {
                 }
             }, ForkJoinPool.commonPool());
         }
-        return isIndexingRun;
+
+        Object result = resultParseIndex;
+
+        return result;
     }
 
     @Override
-    public Boolean stopIndexing()
+    public Object stopIndexing()
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         isIndexingRun = false;
-        forkJoinPool.shutdown();
+        forkJoinPool.wait();
         getSiteAndPage(null, null, isIndexingRun);
-        return isIndexingRun;
+        ResultParseIndex resultParseIndex = new ResultParseIndex();
+        resultParseIndex.setResult(isIndexingRun);
+        Object result = resultParseIndex;
+        return result;
     }
 
     @Override
     public Boolean isIndexingRun() {
         return isIndexingRun;
     }
-
 
     public void getSiteAndPage(String name, String url, Boolean isIndexingRun)
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
@@ -159,8 +168,9 @@ public class IndexServiceImpl implements IndexService {
         }
         return checkSite;
     }
-
 }
+
+
 
 
 

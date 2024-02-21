@@ -34,7 +34,7 @@ public class ApiController {
     }
 
     @GetMapping("/startIndexing")
-    public ResponseEntity start() {
+    public ResponseEntity start() throws InterruptedException {
         if (indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.startIndexing());
         }
@@ -43,7 +43,7 @@ public class ApiController {
 
     @GetMapping("/stopIndexing")
     public ResponseEntity stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
-        if (!indexService.isIndexingRun()) {
+        if (indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.stopIndexing());
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");

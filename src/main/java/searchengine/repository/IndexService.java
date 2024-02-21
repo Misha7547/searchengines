@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public interface IndexService {
 
-    Object startIndexing ();
+    Object startIndexing () throws InterruptedException;
 
     Object stopIndexing() throws SQLException, IOException, ParserConfigurationException, InterruptedException;
 
