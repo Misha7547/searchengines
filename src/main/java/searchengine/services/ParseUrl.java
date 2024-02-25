@@ -17,8 +17,8 @@ import searchengine.repository.PageRepository;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.RecursiveAction;
 
@@ -26,6 +26,15 @@ import java.util.concurrent.RecursiveAction;
 @RequiredArgsConstructor
 @Data
 public class ParseUrl extends RecursiveAction {
+
+    private String url;
+    private PageRepository pageRepository;
+    private SiteRepository siteRepository;
+    private IndexRepository indexRepository;
+    private LemmaRepository lemmaRepository;
+    private String name;
+    private Site site;
+    private boolean indexRun;
 
     public ParseUrl(String url, PageRepository pageRepository, SiteRepository siteRepository,
                     IndexRepository indexRepository, LemmaRepository lemmaRepository, String name, Site site) {
@@ -37,15 +46,6 @@ public class ParseUrl extends RecursiveAction {
         this.name = name;
         this.site = site;
     }
-
-    private String url;
-    private PageRepository pageRepository;
-    private SiteRepository siteRepository;
-    private IndexRepository indexRepository;
-    private LemmaRepository lemmaRepository;
-    private String name;
-    private Site site;
-    private boolean indexRun;
 
     @SneakyThrows
     @Override
@@ -99,7 +99,7 @@ public class ParseUrl extends RecursiveAction {
             page.setContent(content);
             pageRepository.save(page);
             Thread.sleep(500);
-            HashMap<String, Integer> wordsMap = new HashMap<>();
+            Map<String, Integer> wordsMap;
             String clearTegs = lemmatisator.clearingTags(path);
             wordsMap = lemmatisator.lemmatisator(clearTegs);
             for (String key : wordsMap.keySet()) {
@@ -121,13 +121,12 @@ public class ParseUrl extends RecursiveAction {
         index.setLemmaId(lemma);
         index.setPageId(page);
         indexRepository.save(index);
-        if(!indexRun) join();
     }
 
     public  void  setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         boolean сheck = true;
-        if(listLemmas.size() == 0) {
+        if(listLemmas.isEmpty()) {
             Lemma lemma = new Lemma();
             lemma.setSiteByLemma(site);
             lemma.setLemma(key);

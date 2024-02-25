@@ -26,13 +26,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final SitesList sites;
+
     @Autowired
     private final SiteRepository siteRepository;
     @Autowired
     private final PageRepository pageRepository;
     @Autowired
     private final LemmaRepository lemmaRepository;
+    private final SitesList sites;
     private String statusSite = null;
     private String errorSite = null;
     private long dateMillis = 0;
@@ -51,12 +52,12 @@ public class StatisticsServiceImpl implements StatisticsService {
         for(int i = 0; i < sitesList.size(); i++) {
             Site site = sitesList.get(i);
             infoSite(site.getUrl());
-            List<Page> pageList = pageList();
-            List<Lemma> lemmaList = lemmas();
+            List<Page> pageList = listSorting();
+            List<Lemma> lemmaList = lemmaSorting();
             DetailedStatisticsItem item = new DetailedStatisticsItem();
             item.setName(site.getName());
             item.setUrl(site.getUrl());
-            int pages = pageList.size();;
+            int pages = pageList.size();
             int lemmas = lemmaList.size();
             item.setPages(pages);
             item.setLemmas(lemmas);
@@ -77,7 +78,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return response;
     }
 
-    public List<Page> pageList(){
+    public List<Page> listSorting(){
         List<Page> listPages = (List<Page>) pageRepository.findAll();
         List<Page> listPage = new ArrayList<>();
                 int i = idI;
@@ -90,7 +91,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return listPage;
     }
 
-    public List<Lemma> lemmas(){
+    public List<Lemma> lemmaSorting(){
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listLemma = new ArrayList<>();
         int i = idI;

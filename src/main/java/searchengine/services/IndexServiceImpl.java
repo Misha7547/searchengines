@@ -20,8 +20,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -32,32 +31,24 @@ public class IndexServiceImpl implements IndexService {
 
     @Autowired
     SiteRepository siteRepository;
-
     @Autowired
     PageRepository pageRepository;
-
     @Autowired
     LemmaRepository lemmaRepository;
-
     @Autowired
     IndexRepository indexRepository;
-
-    private Boolean isIndexingRun = true;
     @Autowired
     SitesList sitesList;
-
-    ForkJoinPool forkJoinPool = new ForkJoinPool();
-
     @Autowired
     Lemmatisator lemmatisator;
     private Document document;
-
+    private Boolean isIndexingRun = true;
+    ForkJoinPool forkJoinPool = new ForkJoinPool();
     private Boolean checkSite;
-    @Autowired
     ParseUrl parseUrl;
 
     @Override
-    public Object startIndexing() throws InterruptedException {
+    public Object startIndexing(){
         isIndexingRun = true;
         pageRepository.deleteAll();
         siteRepository.deleteAll();
@@ -77,9 +68,7 @@ public class IndexServiceImpl implements IndexService {
             }, ForkJoinPool.commonPool());
         }
 
-        Object result = resultParseIndex;
-
-        return result;
+        return resultParseIndex;
     }
 
     @Override
@@ -87,13 +76,10 @@ public class IndexServiceImpl implements IndexService {
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         isIndexingRun = false;
         parseUrl.setIndexRun(isIndexingRun);
-//        parseUrl.fork();
-//        parseUrl.join();
         getSiteAndPage(null, null, isIndexingRun);
         ResultParseIndex resultParseIndex = new ResultParseIndex();
         resultParseIndex.setResult(isIndexingRun);
-        Object result = resultParseIndex;
-        return result;
+        return resultParseIndex;
     }
 
     @Override
@@ -104,7 +90,7 @@ public class IndexServiceImpl implements IndexService {
     public void getSiteAndPage(String name, String url, Boolean isIndexingRun)
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         searchengine.model.Site site = new searchengine.model.Site();
-        if (isIndexingRun) {
+        if (Boolean.TRUE.equals(isIndexingRun)) {
             site.setName(name);
             site.setUrl(url);
             site.setStatus(Status.INDEXING);
@@ -134,7 +120,7 @@ public class IndexServiceImpl implements IndexService {
         page.setPath(html);
         page.setCode(urlCode(html));
         page.setContent(String.valueOf(document = Jsoup.connect(html).get()));
-        HashMap<String, Integer> wordsMap = new HashMap<>();
+        Map<String, Integer> wordsMap;
         String clearTegs = lemmatisator.clearingTags(html);
         wordsMap = lemmatisator.lemmatisator(clearTegs);
         for (String key : wordsMap.keySet()) {

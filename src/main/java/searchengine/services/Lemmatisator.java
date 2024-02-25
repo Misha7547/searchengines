@@ -11,6 +11,7 @@ import org.tartarus.snowball.ext.RussianStemmer;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +29,7 @@ public class Lemmatisator {
     public Lemmatisator() throws IOException {
     }
 
-    public HashMap<String, Integer> lemmatisator(String offer){
+    public Map<String, Integer> lemmatisator(String offer){
 
         wordsMap = new HashMap<>();
         String text = offer.trim();
@@ -37,9 +38,7 @@ public class Lemmatisator {
         for (String word : words) {
             if (wordCheck(word)) {
                 List<String> wordBaseForms = luceneMorph.getNormalForms(word);
-                wordBaseForms.forEach(w -> {
-                    wordsMap.put(w, wordsMap.getOrDefault(w, 0) + 1);
-                });
+                wordBaseForms.forEach(w -> wordsMap.put(w, wordsMap.getOrDefault(w, 0) + 1));
             }
         }
         return wordsMap;
@@ -50,10 +49,8 @@ public class Lemmatisator {
         if (word.matches(REGEXP_WORD)) {
             List<String> wordBaseForms =
                     luceneMorph.getMorphInfo(word);
-            if ((!wordBaseForms.get(0).endsWith("ПРЕДЛ") && (!wordBaseForms.get(0).endsWith("СОЮЗ")) &&
-                    (!wordBaseForms.get(0).endsWith("ЧАСТ")) && (!wordBaseForms.get(0).endsWith("МЕЖД")))) {
-                return true;
-            }
+            return !wordBaseForms.get(0).endsWith("ПРЕДЛ") && (!wordBaseForms.get(0).endsWith("СОЮЗ")) &&
+                    (!wordBaseForms.get(0).endsWith("ЧАСТ")) && (!wordBaseForms.get(0).endsWith("МЕЖД"));
         }
         return false;
     }
@@ -63,8 +60,7 @@ public class Lemmatisator {
                 .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                 .referrer("http://www.google.com")
                 .get();
-        String textHtml = document.text();
-        return textHtml;
+        return document.text();
     }
 
     public String getSnippet(String content, String textQuery) {

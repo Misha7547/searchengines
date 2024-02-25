@@ -22,16 +22,17 @@ import java.util.*;
 @Data
 public class SearchService {
 
-    @Autowired
-    Lemmatisator lemmatisator;
+
     @Autowired
     private final LemmaRepository lemmaRepository;
     @Autowired
     private final IndexRepository indexRepository;
+    @Autowired
+    Lemmatisator lemmatisator;
 
     public Object search (String query,String siteUrl) throws IOException {
 
-        HashMap<String, Integer> wordsMap =lemmatisator.lemmatisator(query);
+        Map<String, Integer> wordsMap =lemmatisator.lemmatisator(query);
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listSortedLemma = new ArrayList<>();
         List<Index> listIndexAll = (List<Index>) indexRepository.findAll();
@@ -46,15 +47,15 @@ public class SearchService {
         }
 
         for (int i = 0; i < listSortedLemma.size(); i++ ){
-            if(i > 0 && listIndex.size() == 0){
+            if(i > 0 && listIndex.isEmpty()){
                 break;
             } else
-            searchIndex(listSortedLemma.get(i),listIndexAll,listIndex);
+             searchIndex(listSortedLemma.get(i),listIndexAll,listIndex);
         }
 
         checkSite(siteUrl,listIndex);
 
-        if(listIndex.size() == 0){
+        if(listIndex.isEmpty()){
             ResultSearch result=new ResultSearch();
             resultSearch = getDataResponse(listIndex,result);
         } else {
@@ -68,7 +69,7 @@ public class SearchService {
 
             double max = Collections.max(absoluteRelevanceList.values());
             countRelative(absoluteRelevanceList, relativeRelevanceList,max);
-            List < Map.Entry<Index,Double>> list = new LinkedList<Map.Entry<Index, Double>>(relativeRelevanceList.entrySet());
+            List < Map.Entry<Index,Double>> list = new LinkedList<>(relativeRelevanceList.entrySet());
             sort(list);
             resultSearch = createSearchResult(list,query,listIndex);
         }
@@ -82,24 +83,19 @@ public class SearchService {
                 listSortedLemma.add(lemma);
             }
         }
-        Collections.sort(listSortedLemma, new Comparator<Lemma>() {
-            @Override
-            public int compare(Lemma o1, Lemma o2) {
-                return o1.getFrequency() - o2.getFrequency();
-            }
-        });
+        listSortedLemma.sort((o1, o2) -> o1.getFrequency() - o2.getFrequency());
     }
 
     public void searchIndex (Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
 
-        if (listIndex.size() == 0 ){
+        if (listIndex.isEmpty() ){
             getIndexOne(lemma,listIndexAll,listIndex);
         } else {
             List <Index> numberIndex =new ArrayList<>();
             for (int i = 0; i < listIndex.size(); i++){
                 int j= deleteIndex( i ,lemma, listIndexAll, listIndex);
                 if (j == 0)
-                numberIndex.add(listIndex.get(i));
+                 numberIndex.add(listIndex.get(i));
             }
             for (Index j : numberIndex){
                 listIndex.remove(j);
@@ -108,14 +104,14 @@ public class SearchService {
     }
 
     public void absoluteRelevance (Index index, List<Index> listIndexAll,
-                                   List<Lemma> listSortedLemma, HashMap <Index, Integer> absoluteRelevanceList){
+                                   List<Lemma> listSortedLemma, Map <Index, Integer> absoluteRelevanceList){
 
         int g = 0;
         for(Lemma lemma: listSortedLemma){
             for( Index indexs: listIndexAll){
                 if(indexs.getPageId().getId() == index.getPageId().getId()
                         && indexs.getLemmaId().getLemma().equals(lemma.getLemma()))
-                g = g+indexs.getRank();
+                 g = g+indexs.getRank();
             }
         }
         absoluteRelevanceList.put(index,g);
@@ -130,7 +126,7 @@ public class SearchService {
 
             ResultSearch resultSearch = new ResultSearch();
             resultSearch.setSite(index.getKey().getPageId().getSiteId().getUrl());
-            resultSearch.setSiteName(index.getKey().getPageId().getSiteId().getName().toString());
+            resultSearch.setSiteName(index.getKey().getPageId().getSiteId().getName());
             resultSearch.setUri(index.getKey().getPageId().getPath());
             Document document = Jsoup.connect(index.getKey().getPageId().getPath()).get();
             resultSearch.setTitle(document.title());
@@ -142,8 +138,8 @@ public class SearchService {
         return searchResult;
     }
 
-    public void countRelative ( HashMap <Index, Integer> absoluteRelevanceList,
-                                HashMap <Index, Double> relativeRelevanceList, double max){
+    public void countRelative ( Map <Index, Integer> absoluteRelevanceList,
+                                Map <Index, Double> relativeRelevanceList, double max){
         double relativeRelevances;
 
         for ( Index index: absoluteRelevanceList.keySet()){
@@ -154,12 +150,7 @@ public class SearchService {
 
     public void sort (List < Map.Entry<Index,Double>> list){
 
-        Collections.sort(list, new Comparator<Map.Entry<Index, Double>>() {
-            @Override
-            public int compare(Map.Entry<Index, Double> o1, Map.Entry<Index, Double> o2) {
-                return o2.getValue().compareTo(o1.getValue());
-            }
-        });
+        list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
     }
 
     public DateResponse getDataResponse (List<Index> listIndex, ResultSearch result){

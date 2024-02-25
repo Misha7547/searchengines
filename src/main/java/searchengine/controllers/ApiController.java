@@ -35,7 +35,7 @@ public class ApiController {
 
     @GetMapping("/startIndexing")
     public ResponseEntity<Object> start() throws InterruptedException {
-        if (indexService.isIndexingRun()) {
+        if (Boolean.TRUE.equals(indexService.isIndexingRun())) {
             return ResponseEntity.ok(indexService.startIndexing());
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");
@@ -43,7 +43,7 @@ public class ApiController {
 
     @GetMapping("/stopIndexing")
     public ResponseEntity<Object> stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
-        if (indexService.isIndexingRun()) {
+        if (Boolean.TRUE.equals(indexService.isIndexingRun())) {
             return ResponseEntity.ok(indexService.stopIndexing());
         }
         return ResponseEntity.badRequest().body("Индексация не запущена");
@@ -51,7 +51,7 @@ public class ApiController {
 
     @PostMapping("/indexPage")
     public ResponseEntity<Object> getPage(@RequestParam(name = "url") String url) throws IOException{
-      if(indexService.checkSite(url)){
+      if(Boolean.TRUE.equals(indexService.checkSite(url))){
           return ResponseEntity.ok(indexService.getIndexPage(url));
       }
       return ResponseEntity.badRequest().body("Данная страница находится за пределами сайтов, \n" +
