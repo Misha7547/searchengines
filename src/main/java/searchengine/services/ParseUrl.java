@@ -2,6 +2,7 @@ package searchengine.services;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,16 +20,36 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.RecursiveAction;
 
 @Service
 @RequiredArgsConstructor
 @Data
-public class ParseUrl {
+public class ParseUrl extends RecursiveAction {
 
+    public ParseUrl(String url, PageRepository pageRepository, SiteRepository siteRepository,
+                    IndexRepository indexRepository, LemmaRepository lemmaRepository, String name, Site site) {
+        this.url = url;
+        this.pageRepository = pageRepository;
+        this.siteRepository = siteRepository;
+        this.indexRepository = indexRepository;
+        this.lemmaRepository = lemmaRepository;
+        this.name = name;
+        this.site = site;
+    }
 
-    public void parsWeb(String url, PageRepository pageRepository, SiteRepository siteRepository, IndexRepository indexRepository,
-                        LemmaRepository lemmaRepository, String name,Site site)
-            throws IOException {
+    private String url;
+    private PageRepository pageRepository;
+    private SiteRepository siteRepository;
+    private IndexRepository indexRepository;
+    private LemmaRepository lemmaRepository;
+    private String name;
+    private Site site;
+    private boolean indexRun;
+
+    @SneakyThrows
+    @Override
+    protected void compute() {
 
         CopyOnWriteArrayList<String> links = new CopyOnWriteArrayList<>();
         links.add(url);
@@ -48,6 +69,7 @@ public class ParseUrl {
                         int code = urlCode(linksChildren);
                         setPage(path, code, String.valueOf(document), pageRepository, url,
                                 site, siteRepository, lemmaRepository, indexRepository, name);
+                        if(!indexRun) wait();
                     }
                 }
             }
@@ -99,6 +121,7 @@ public class ParseUrl {
         index.setLemmaId(lemma);
         index.setPageId(page);
         indexRepository.save(index);
+        if(!indexRun) join();
     }
 
     public  void  setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {

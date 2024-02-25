@@ -56,7 +56,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             DetailedStatisticsItem item = new DetailedStatisticsItem();
             item.setName(site.getName());
             item.setUrl(site.getUrl());
-            int pages = pageList.size();
+            int pages = pageList.size();;
             int lemmas = lemmaList.size();
             item.setPages(pages);
             item.setLemmas(lemmas);

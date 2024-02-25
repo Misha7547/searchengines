@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
@@ -52,6 +53,8 @@ public class IndexServiceImpl implements IndexService {
     private Document document;
 
     private Boolean checkSite;
+    @Autowired
+    ParseUrl parseUrl;
 
     @Override
     public Object startIndexing() throws InterruptedException {
@@ -83,7 +86,9 @@ public class IndexServiceImpl implements IndexService {
     public Object stopIndexing()
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         isIndexingRun = false;
-        forkJoinPool.wait();
+        parseUrl.setIndexRun(isIndexingRun);
+//        parseUrl.fork();
+//        parseUrl.join();
         getSiteAndPage(null, null, isIndexingRun);
         ResultParseIndex resultParseIndex = new ResultParseIndex();
         resultParseIndex.setResult(isIndexingRun);
@@ -99,21 +104,24 @@ public class IndexServiceImpl implements IndexService {
     public void getSiteAndPage(String name, String url, Boolean isIndexingRun)
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         searchengine.model.Site site = new searchengine.model.Site();
-        ParseUrl parseUrl = new ParseUrl();
         if (isIndexingRun) {
             site.setName(name);
             site.setUrl(url);
             site.setStatus(Status.INDEXING);
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
             siteRepository.save(site);
-            parseUrl.parsWeb(url, pageRepository, siteRepository, indexRepository, lemmaRepository,name,site);
+            parseUrl = new ParseUrl(url, pageRepository, siteRepository, indexRepository, lemmaRepository,name,site);
+            parseUrl.setIndexRun(isIndexingRun);
+            parseUrl.fork();
         } else {
-            site.setName(name);
-            site.setUrl(url);
-            site.setStatus(Status.FAILED);
-            site.setLastError("Индексация остановлена пользователем");
-            site.setStatusTime(new Timestamp(System.currentTimeMillis()));
-            siteRepository.save(site);
+            Iterable<searchengine.model.Site> list = siteRepository.findAll();
+            for (searchengine.model.Site sites: list){
+                searchengine.model.Site siteSave = siteRepository.findById(sites.getId()).orElseThrow();
+                siteSave.setStatus(Status.FAILED);
+                siteSave.setLastError("Индексация остановлена пользователем");
+                siteSave.setStatusTime(new Timestamp(System.currentTimeMillis()));
+                siteRepository.save(siteSave);
+            }
         }
     }
 

@@ -34,7 +34,7 @@ public class ApiController {
     }
 
     @GetMapping("/startIndexing")
-    public ResponseEntity start() throws InterruptedException {
+    public ResponseEntity<Object> start() throws InterruptedException {
         if (indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.startIndexing());
         }
@@ -42,7 +42,7 @@ public class ApiController {
     }
 
     @GetMapping("/stopIndexing")
-    public ResponseEntity stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
+    public ResponseEntity<Object> stop() throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         if (indexService.isIndexingRun()) {
             return ResponseEntity.ok(indexService.stopIndexing());
         }
