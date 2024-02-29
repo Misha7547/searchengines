@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.DateResponse;
 import searchengine.dto.statistics.ResultSearch;
+import searchengine.interfaces.SearchService;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.repository.IndexRepository;
@@ -20,15 +21,13 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Data
-public class SearchServiceImpl implements searchengine.interfaces.SearchService {
+public class SearchServiceImpl implements SearchService {
 
 
-    @Autowired
+
     private final LemmaRepository lemmaRepository;
-    @Autowired
     private final IndexRepository indexRepository;
-    @Autowired
-    Lemmatisator lemmatisator;
+    private final Lemmatisator lemmatisator;
 
     public Object search (String query,String siteUrl) throws IOException {
 
@@ -41,7 +40,7 @@ public class SearchServiceImpl implements searchengine.interfaces.SearchService 
 
         for (String key : wordsMap.keySet()) {
             if (wordsMap.get(key) > 8 ){
-                wordsMap.remove(wordsMap.get(key));
+                wordsMap.remove(key);
             }
             searchLemma(key, listLemmas,listSortedLemma);
         }

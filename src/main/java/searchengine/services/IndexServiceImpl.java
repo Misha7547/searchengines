@@ -30,18 +30,12 @@ import java.util.concurrent.ForkJoinPool;
 @Data
 public class IndexServiceImpl implements IndexService {
 
-    @Autowired
-    SiteRepository siteRepository;
-    @Autowired
-    PageRepository pageRepository;
-    @Autowired
-    LemmaRepository lemmaRepository;
-    @Autowired
-    IndexRepository indexRepository;
-    @Autowired
-    SitesList sitesList;
-    @Autowired
-    Lemmatisator lemmatisator;
+    private final SiteRepository siteRepository;
+    private final PageRepository pageRepository;
+    private final LemmaRepository lemmaRepository;
+    private final IndexRepository indexRepository;
+    private final SitesList sitesList;
+    private final Lemmatisator lemmatisator;
     private Boolean isIndexingRun = true;
     ForkJoinPool forkJoinPool = new ForkJoinPool();
     private Boolean checkSite;

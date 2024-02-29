@@ -27,11 +27,9 @@ import java.util.List;
 public class StatisticsServiceImpl implements StatisticsService {
 
 
-    @Autowired
+
     private final SiteRepository siteRepository;
-    @Autowired
     private final PageRepository pageRepository;
-    @Autowired
     private final LemmaRepository lemmaRepository;
     private final SitesList sites;
     private String statusSite = null;
