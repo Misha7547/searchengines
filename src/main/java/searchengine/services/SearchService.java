@@ -37,7 +37,7 @@ public class SearchService {
         List<Lemma> listSortedLemma = new ArrayList<>();
         List<Index> listIndexAll = (List<Index>) indexRepository.findAll();
         List<Index> listIndex = new ArrayList<>();
-        Object resultSearch;
+        Object resultSearch = null;
 
         for (String key : wordsMap.keySet()) {
             if (wordsMap.get(key) > 8 ){
@@ -57,7 +57,7 @@ public class SearchService {
 
         if(listIndex.isEmpty()){
             ResultSearch result=new ResultSearch();
-            resultSearch = getDataResponse(listIndex,result);
+            resultSearch = getDataResponse(listIndex, (List<ResultSearch>) result);
         } else {
 
             HashMap <Index, Integer> absoluteRelevanceList = new HashMap<>();
@@ -117,10 +117,10 @@ public class SearchService {
         absoluteRelevanceList.put(index,g);
     }
 
-    private List<DateResponse> createSearchResult(List < Map.Entry<Index,Double>> list,
+    private DateResponse createSearchResult(List < Map.Entry<Index,Double>> list,
                                                   String query, List<Index> listIndex) throws IOException {
 
-        List<DateResponse> searchResult = new ArrayList<>();
+        List<ResultSearch> searchResult = new ArrayList<>();
 
         for (Map.Entry<Index, Double> index: list){
 
@@ -132,10 +132,9 @@ public class SearchService {
             resultSearch.setTitle(document.title());
             resultSearch.setSnippet(lemmatisator.getSnippet(index.getKey().getPageId().getContent(), query));
             resultSearch.setRelevance(index.getValue());
-            DateResponse dateResponse = getDataResponse(listIndex,resultSearch);
-            searchResult.add(dateResponse);
+            searchResult.add(resultSearch);
         }
-        return searchResult;
+        return getDataResponse(listIndex,searchResult);
     }
 
     public void countRelative ( Map <Index, Integer> absoluteRelevanceList,
@@ -153,13 +152,12 @@ public class SearchService {
         list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
     }
 
-    public DateResponse getDataResponse (List<Index> listIndex, ResultSearch result){
+    public DateResponse getDataResponse (List<Index> listIndex, List<ResultSearch> searchResult){
 
         DateResponse dateResponse =new DateResponse();
         dateResponse.setResult(true);
         dateResponse.setCount(listIndex.size());
-        dateResponse.setResultSearch(result);
-
+        dateResponse.setData(searchResult);
         return dateResponse;
     }
 

@@ -78,7 +78,7 @@ public class IndexServiceImpl implements IndexService {
         parseUrl.setIndexRun(isIndexingRun);
         getSiteAndPage(null, null, isIndexingRun);
         ResultParseIndex resultParseIndex = new ResultParseIndex();
-        resultParseIndex.setResult(isIndexingRun);
+        resultParseIndex.setResult(true);
         return resultParseIndex;
     }
 

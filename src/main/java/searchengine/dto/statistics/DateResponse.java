@@ -3,6 +3,8 @@ package searchengine.dto.statistics;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DateResponse {
 
@@ -10,5 +12,5 @@ public class DateResponse {
 
     private int count;
 
-    private ResultSearch resultSearch;
+    private List <ResultSearch> data;
 }
