@@ -68,14 +68,9 @@ public class Lemmatisator {
         String textForSearchQuery = Jsoup.parse(content).getElementsContainingOwnText(textQuery).text();
         Pattern pattern = Pattern.compile(textQuery);
         Matcher matcher = pattern.matcher(textForSearchQuery);
-        String snippet ;
+        String snippet;
         if (matcher.find()) {
-            int beginIndex = matcher.start() > 80 ?
-                    textForSearchQuery.lastIndexOf(' ', matcher.start() - 60) : 0;
-            int endIndex = Math.min(beginIndex + matcher.end() + 160, textForSearchQuery.length());
-            snippet = textForSearchQuery.substring(beginIndex, endIndex);
-            snippet = StringUtils.replace(snippet, textQuery, "<b>" + textQuery + "</b>");
-
+            snippet = find(matcher,textForSearchQuery,textQuery);
         } else {
             textQuery = textQuery.trim();
             String[] words = textQuery.toLowerCase().split(REGEXP_TEXT);
@@ -93,12 +88,7 @@ public class Lemmatisator {
                     pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE);
                     matcher = pattern.matcher(textForSearchWord);
                     if (matcher.find()) {
-                        int beginIndex = matcher.start() > 35 ?
-                                textForSearchWord.lastIndexOf(' ', matcher.start() - 15) : 0;
-                        int endIndex = Math.min(matcher.start() + 80, textForSearchWord.length());
-                        String result = matcher.group();
-                        String snippetWord = textForSearchWord.substring(beginIndex, endIndex);
-                        snippetWord = StringUtils.replace(snippetWord, result, "<b>" + result + "</b>");
+                        String snippetWord = findSnippet( matcher,textForSearchWord);
                         builderSnippet.append(snippetWord).append("...");
                     }
                 }
@@ -106,6 +96,30 @@ public class Lemmatisator {
             snippet = builderSnippet.toString();
         }
         return snippet;
+    }
+
+    private String find (Matcher matcher,String textForSearchQuery, String textQuery){
+
+        String snippet;
+        int beginIndex = matcher.start() > 80 ?
+                textForSearchQuery.lastIndexOf(' ', matcher.start() - 60) : 0;
+        int endIndex = Math.min(beginIndex + matcher.end() + 160, textForSearchQuery.length());
+        snippet = textForSearchQuery.substring(beginIndex, endIndex);
+        snippet = StringUtils.replace(snippet, textQuery, "<b>" + textQuery + "</b>");
+        return snippet;
+
+    }
+
+    private String findSnippet(Matcher matcher, String textForSearchWord ){
+
+        int beginIndex = matcher.start() > 35 ?
+                textForSearchWord.lastIndexOf(' ', matcher.start() - 15) : 0;
+        int endIndex = Math.min(matcher.start() + 80, textForSearchWord.length());
+        String result = matcher.group();
+        String snippetWord = textForSearchWord.substring(beginIndex, endIndex);
+        snippetWord = StringUtils.replace(snippetWord, result, "<b>" + result + "</b>");
+        return snippetWord;
+
     }
 }
 
