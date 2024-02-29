@@ -28,7 +28,7 @@ public class Lemmatisator {
     public Lemmatisator() throws IOException {
     }
 
-    public Map<String, Integer> lemmatisator(String offer){
+    public Map<String, Integer> lemmatisator(String offer) {
         HashMap<String, Integer> wordsMap;
         wordsMap = new HashMap<>();
         String text = offer.trim();
@@ -54,7 +54,7 @@ public class Lemmatisator {
         return false;
     }
 
-    public String clearingTags ( String html) throws IOException {
+    public String clearingTags(String html) throws IOException {
         Document document = Jsoup.connect(html)
                 .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
                 .referrer("http://www.google.com")
@@ -69,7 +69,7 @@ public class Lemmatisator {
         Matcher matcher = pattern.matcher(textForSearchQuery);
         String snippet;
         if (matcher.find()) {
-            snippet = find(matcher,textForSearchQuery,textQuery);
+            snippet = find(matcher, textForSearchQuery, textQuery);
         } else {
             textQuery = textQuery.trim();
             String[] words = textQuery.toLowerCase().split(REGEXP_TEXT);
@@ -87,7 +87,7 @@ public class Lemmatisator {
                     pattern = Pattern.compile(word, Pattern.CASE_INSENSITIVE);
                     matcher = pattern.matcher(textForSearchWord);
                     if (matcher.find()) {
-                        String snippetWord = findSnippet( matcher,textForSearchWord);
+                        String snippetWord = findSnippet(matcher, textForSearchWord);
                         builderSnippet.append(snippetWord).append("...");
                     }
                 }
@@ -97,7 +97,7 @@ public class Lemmatisator {
         return snippet;
     }
 
-    private String find (Matcher matcher,String textForSearchQuery, String textQuery){
+    private String find(Matcher matcher, String textForSearchQuery, String textQuery) {
 
         String snippet;
         int beginIndex = matcher.start() > 80 ?
@@ -109,7 +109,7 @@ public class Lemmatisator {
 
     }
 
-    private String findSnippet(Matcher matcher, String textForSearchWord ){
+    private String findSnippet(Matcher matcher, String textForSearchWord) {
 
         int beginIndex = matcher.start() > 35 ?
                 textForSearchWord.lastIndexOf(' ', matcher.start() - 15) : 0;

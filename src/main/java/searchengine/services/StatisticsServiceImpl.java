@@ -1,7 +1,6 @@
 package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.config.Site;
 import searchengine.config.SitesList;
@@ -46,7 +45,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         List<DetailedStatisticsItem> detailed = new ArrayList<>();
         List<Site> sitesList = sites.getSites();
-        for(int i = 0; i < sitesList.size(); i++) {
+        for (int i = 0; i < sitesList.size(); i++) {
             Site site = sitesList.get(i);
             infoSite(site.getUrl());
             List<Page> pageList = listSorting();
@@ -75,42 +74,42 @@ public class StatisticsServiceImpl implements StatisticsService {
         return response;
     }
 
-    private List<Page> listSorting(){
+    private List<Page> listSorting() {
         List<Page> listPages = (List<Page>) pageRepository.findAll();
         List<Page> listPage = new ArrayList<>();
-                int i = idI;
-                for (Page page: listPages){
-                    int x = page.getSiteId().getId();
-                    if(x == i){
-                        listPage.add(page);
-                    }
-                }
+        int i = idI;
+        for (Page page : listPages) {
+            int x = page.getSiteId().getId();
+            if (x == i) {
+                listPage.add(page);
+            }
+        }
         return listPage;
     }
 
-    private List<Lemma> lemmaSorting(){
+    private List<Lemma> lemmaSorting() {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listLemma = new ArrayList<>();
         int i = idI;
-        for (Lemma lemma:listLemmas){
+        for (Lemma lemma : listLemmas) {
             int x = lemma.getSiteByLemma().getId();
-            if(x == i){
+            if (x == i) {
                 listLemma.add(lemma);
             }
         }
         return listLemma;
     }
 
-    private void infoSite(String urlSite){
+    private void infoSite(String urlSite) {
         Date date;
         List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
-        for (searchengine.model.Site site: listsites){
-            if(urlSite.contains(site.getUrl())){
-               idI = site.getId();
-               statusSite = site.getStatus().toString();
-               errorSite = site.getLastError();
-               date = site.getStatusTime();
-               dateMillis = date.getTime();
+        for (searchengine.model.Site site : listsites) {
+            if (urlSite.contains(site.getUrl())) {
+                idI = site.getId();
+                statusSite = site.getStatus().toString();
+                errorSite = site.getLastError();
+                date = site.getStatusTime();
+                dateMillis = date.getTime();
             }
         }
     }

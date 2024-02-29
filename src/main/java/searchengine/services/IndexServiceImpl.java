@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.ResultParseIndex;
 import searchengine.interfaces.IndexService;
@@ -42,7 +40,7 @@ public class IndexServiceImpl implements IndexService {
     ParseUrl parseUrl;
 
     @Override
-    public Object startIndexing(){
+    public Object startIndexing() {
         isIndexingRun = true;
         pageRepository.deleteAll();
         siteRepository.deleteAll();
@@ -90,12 +88,12 @@ public class IndexServiceImpl implements IndexService {
             site.setStatus(Status.INDEXING);
             site.setStatusTime(new Timestamp(System.currentTimeMillis()));
             siteRepository.save(site);
-            parseUrl = new ParseUrl(url, pageRepository, siteRepository, indexRepository, lemmaRepository,name,site);
+            parseUrl = new ParseUrl(url, pageRepository, siteRepository, indexRepository, lemmaRepository, name, site);
             parseUrl.setIndexRun(isIndexingRun);
             parseUrl.fork();
         } else {
             Iterable<searchengine.model.Site> list = siteRepository.findAll();
-            for (searchengine.model.Site sites: list){
+            for (searchengine.model.Site sites : list) {
                 searchengine.model.Site siteSave = siteRepository.findById(sites.getId()).orElseThrow();
                 siteSave.setStatus(Status.FAILED);
                 siteSave.setLastError("Индексация остановлена пользователем");
@@ -146,9 +144,9 @@ public class IndexServiceImpl implements IndexService {
     }
 
     @Override
-    public Boolean checkSite(String html){
+    public Boolean checkSite(String html) {
 
-        for (Site list : sitesList.getSites()){
+        for (Site list : sitesList.getSites()) {
             checkSite = html.contains((CharSequence) list);
         }
         return checkSite;

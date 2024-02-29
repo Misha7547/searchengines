@@ -51,29 +51,31 @@ public class ParseUrl extends RecursiveAction {
     @Override
     protected void compute() {
 
-        CopyOnWriteArrayList<String> links = new CopyOnWriteArrayList<>();
-        links.add(url);
-        while (!links.isEmpty()) {
-            for (String link : links) {
-                Document document = Jsoup.connect(link)
-                        .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
-                        .referrer("http://www.google.com")
-                        .get();
-                Elements postUrl = document.select("a");
-                for (Element post : postUrl) {
-                    String linksChildren = post.attr("abs:href");
-                    if (!link.contains(linksChildren)
-                            && !linksChildren.contains(url)) {
-                        links.add(linksChildren);
-                        String path = linksChildren.replaceAll(url, " ");
-                        int code = urlCode(linksChildren);
-                        setPage(path, code, String.valueOf(document), pageRepository, url,
-                                site, siteRepository, lemmaRepository, indexRepository, name);
-                        if(!indexRun) wait();
+        if (indexRun) {
+            CopyOnWriteArrayList<String> links = new CopyOnWriteArrayList<>();
+            links.add(url);
+            while (!links.isEmpty()) {
+                for (String link : links) {
+                    Document document = Jsoup.connect(link)
+                            .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                            .referrer("http://www.google.com")
+                            .get();
+                    Elements postUrl = document.select("a");
+                    for (Element post : postUrl) {
+                        String linksChildren = post.attr("abs:href");
+                        if (!link.contains(linksChildren)
+                                && !linksChildren.contains(url)) {
+                            links.add(linksChildren);
+                            String path = linksChildren.replaceAll(url, " ");
+                            int code = urlCode(linksChildren);
+                            setPage(path, code, String.valueOf(document), pageRepository, url,
+                                    site, siteRepository, lemmaRepository, indexRepository, name);
+                            if (!indexRun) wait();
+                        }
                     }
                 }
             }
-        }
+        } else join();
     }
 
     private static int urlCode(String url) {
@@ -88,9 +90,9 @@ public class ParseUrl extends RecursiveAction {
     }
 
     private void setPage(String path, int code, String content, PageRepository pageRepository,
-                        String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository,
-                        IndexRepository indexRepository,String name) throws IOException {
-        Lemmatisator lemmatisator  = new Lemmatisator();
+                         String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository,
+                         IndexRepository indexRepository, String name) throws IOException {
+        Lemmatisator lemmatisator = new Lemmatisator();
         Page page = new Page();
         try {
             page.setSiteId(site);
@@ -103,7 +105,7 @@ public class ParseUrl extends RecursiveAction {
             String clearTegs = lemmatisator.clearingTags(path);
             wordsMap = lemmatisator.lemmatisator(clearTegs);
             for (String key : wordsMap.keySet()) {
-                setLemma(lemmaRepository,key,site,page, wordsMap.get(key),indexRepository);
+                setLemma(lemmaRepository, key, site, page, wordsMap.get(key), indexRepository);
             }
         } catch (Exception e) {
             site.setName(name);
@@ -115,7 +117,7 @@ public class ParseUrl extends RecursiveAction {
         }
     }
 
-    private void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
+    private void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i) {
         Index index = new Index();
         index.setRank(i);
         index.setLemmaId(lemma);
@@ -126,25 +128,25 @@ public class ParseUrl extends RecursiveAction {
     private void setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         boolean сheck = true;
-        if(listLemmas.isEmpty()) {
+        if (listLemmas.isEmpty()) {
             Lemma lemma = new Lemma();
             lemma.setSiteByLemma(site);
             lemma.setLemma(key);
             lemma.setFrequency(1);
             lemmaRepository.save(lemma);
             indexSet(lemma, page, indexRepository, i);
-        } else{
+        } else {
             for (Lemma lemma : listLemmas) {
                 if (key.equals(lemma.getLemma())) {
                     Lemma lemmaSave = lemmaRepository.findById(lemma.getId()).orElseThrow();
-                    lemmaSave.setFrequency(lemma.getFrequency() +1);
+                    lemmaSave.setFrequency(lemma.getFrequency() + 1);
                     lemmaRepository.save(lemmaSave);
-                    indexSet(lemmaSave,page,indexRepository,i);
+                    indexSet(lemmaSave, page, indexRepository, i);
                     сheck = false;
                     break;
                 }
             }
-            if(сheck) {
+            if (сheck) {
                 Lemma lemmas = new Lemma();
                 lemmas.setSiteByLemma(site);
                 lemmas.setLemma(key);
