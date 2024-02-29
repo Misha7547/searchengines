@@ -76,7 +76,7 @@ public class ParseUrl extends RecursiveAction {
         }
     }
 
-    public static int urlCode(String url) {
+    private static int urlCode(String url) {
         int code;
         try {
             Connection.Response response = Jsoup.connect(url).execute();
@@ -87,7 +87,7 @@ public class ParseUrl extends RecursiveAction {
         return code;
     }
 
-    public void setPage(String path, int code, String content, PageRepository pageRepository,
+    private void setPage(String path, int code, String content, PageRepository pageRepository,
                         String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository,
                         IndexRepository indexRepository,String name) throws IOException {
         Lemmatisator lemmatisator  = new Lemmatisator();
@@ -115,7 +115,7 @@ public class ParseUrl extends RecursiveAction {
         }
     }
 
-    public void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
+    private void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i ){
         Index index = new Index();
         index.setRank(i);
         index.setLemmaId(lemma);
@@ -123,7 +123,7 @@ public class ParseUrl extends RecursiveAction {
         indexRepository.save(index);
     }
 
-    public  void  setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
+    private void setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         boolean сheck = true;
         if(listLemmas.isEmpty()) {

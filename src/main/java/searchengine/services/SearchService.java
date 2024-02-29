@@ -37,7 +37,7 @@ public class SearchService {
         List<Lemma> listSortedLemma = new ArrayList<>();
         List<Index> listIndexAll = (List<Index>) indexRepository.findAll();
         List<Index> listIndex = new ArrayList<>();
-        Object resultSearch = null;
+        Object resultSearch;
 
         for (String key : wordsMap.keySet()) {
             if (wordsMap.get(key) > 8 ){
@@ -76,7 +76,7 @@ public class SearchService {
         return resultSearch ;
     }
 
-    public void searchLemma (String key, List <Lemma> listLemmas, List<Lemma> listSortedLemma){
+    private void searchLemma (String key, List <Lemma> listLemmas, List<Lemma> listSortedLemma){
 
         for (Lemma lemma : listLemmas){
             if (key.equals(lemma.getLemma())){
@@ -86,7 +86,7 @@ public class SearchService {
         listSortedLemma.sort((o1, o2) -> o1.getFrequency() - o2.getFrequency());
     }
 
-    public void searchIndex (Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
+    private void searchIndex (Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
 
         if (listIndex.isEmpty() ){
             getIndexOne(lemma,listIndexAll,listIndex);
@@ -103,9 +103,8 @@ public class SearchService {
         }
     }
 
-    public void absoluteRelevance (Index index, List<Index> listIndexAll,
+    private void absoluteRelevance (Index index, List<Index> listIndexAll,
                                    List<Lemma> listSortedLemma, Map <Index, Integer> absoluteRelevanceList){
-
         int g = 0;
         for(Lemma lemma: listSortedLemma){
             for( Index indexs: listIndexAll){
@@ -119,9 +118,7 @@ public class SearchService {
 
     private DateResponse createSearchResult(List < Map.Entry<Index,Double>> list,
                                                   String query, List<Index> listIndex) throws IOException {
-
         List<ResultSearch> searchResult = new ArrayList<>();
-
         for (Map.Entry<Index, Double> index: list){
 
             ResultSearch resultSearch = new ResultSearch();
@@ -137,7 +134,7 @@ public class SearchService {
         return getDataResponse(listIndex,searchResult);
     }
 
-    public void countRelative ( Map <Index, Integer> absoluteRelevanceList,
+    private void countRelative ( Map <Index, Integer> absoluteRelevanceList,
                                 Map <Index, Double> relativeRelevanceList, double max){
         double relativeRelevances;
 
@@ -147,12 +144,12 @@ public class SearchService {
         }
     }
 
-    public void sort (List < Map.Entry<Index,Double>> list){
+    private void sort (List < Map.Entry<Index,Double>> list){
 
         list.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
     }
 
-    public DateResponse getDataResponse (List<Index> listIndex, List<ResultSearch> searchResult){
+    private DateResponse getDataResponse (List<Index> listIndex, List<ResultSearch> searchResult){
 
         DateResponse dateResponse =new DateResponse();
         dateResponse.setResult(true);
@@ -161,7 +158,7 @@ public class SearchService {
         return dateResponse;
     }
 
-    public void checkSite ( String siteUrl, List<Index> listIndex){
+    private void checkSite ( String siteUrl, List<Index> listIndex){
 
         if( siteUrl != null){
             List <Index> numberIndex =new ArrayList<>();
@@ -178,7 +175,7 @@ public class SearchService {
         }
     }
 
-    public void getIndexOne(Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
+    private void getIndexOne(Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
 
         for (Index index: listIndexAll){
             if(lemma.getId() == index.getLemmaId().getId())
@@ -186,7 +183,7 @@ public class SearchService {
         }
     }
 
-    public int deleteIndex(int i , Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
+    private int deleteIndex(int i , Lemma lemma, List<Index> listIndexAll, List<Index> listIndex){
         int j = 0;
         for (Index indexs: listIndexAll){
             if(indexs.getPageId() == listIndex.get(i).getPageId()

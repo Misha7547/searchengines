@@ -87,7 +87,7 @@ public class IndexServiceImpl implements IndexService {
         return isIndexingRun;
     }
 
-    public void getSiteAndPage(String name, String url, Boolean isIndexingRun)
+    private void getSiteAndPage(String name, String url, Boolean isIndexingRun)
             throws SQLException, IOException, ParserConfigurationException, InterruptedException {
         searchengine.model.Site site = new searchengine.model.Site();
         if (Boolean.TRUE.equals(isIndexingRun)) {
@@ -115,11 +115,12 @@ public class IndexServiceImpl implements IndexService {
     public Object getIndexPage(String html) throws IOException {
         Page page = new Page();
         searchengine.model.Site site = new searchengine.model.Site();
+        String contents = String.valueOf(document = Jsoup.connect(html).get());
         site.setName(html);
         page.setSiteId(site);
         page.setPath(html);
         page.setCode(urlCode(html));
-        page.setContent(String.valueOf(document = Jsoup.connect(html).get()));
+        page.setContent(contents);
         Map<String, Integer> wordsMap;
         String clearTegs = lemmatisator.clearingTags(html);
         wordsMap = lemmatisator.lemmatisator(clearTegs);
@@ -139,7 +140,7 @@ public class IndexServiceImpl implements IndexService {
         return null;
     }
 
-    public static int urlCode(String url) {
+    private static int urlCode(String url) {
         int code;
         try {
             Connection.Response response = Jsoup.connect(url).execute();
@@ -154,11 +155,7 @@ public class IndexServiceImpl implements IndexService {
     public Boolean checkSite(String html){
 
         for (Site list : sitesList.getSites()){
-            if (html.contains((CharSequence) list)){
-                checkSite = true;
-            } else {
-                checkSite = false;
-            }
+            checkSite = html.contains((CharSequence) list);
         }
         return checkSite;
     }

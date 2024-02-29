@@ -44,7 +44,7 @@ public class Lemmatisator {
         return wordsMap;
     }
 
-    public boolean wordCheck(String word) {
+    private boolean wordCheck(String word) {
 
         if (word.matches(REGEXP_WORD)) {
             List<String> wordBaseForms =

@@ -78,7 +78,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return response;
     }
 
-    public List<Page> listSorting(){
+    private List<Page> listSorting(){
         List<Page> listPages = (List<Page>) pageRepository.findAll();
         List<Page> listPage = new ArrayList<>();
                 int i = idI;
@@ -91,7 +91,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return listPage;
     }
 
-    public List<Lemma> lemmaSorting(){
+    private List<Lemma> lemmaSorting(){
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         List<Lemma> listLemma = new ArrayList<>();
         int i = idI;
@@ -104,7 +104,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         return listLemma;
     }
 
-    public void   infoSite(String urlSite){
+    private void infoSite(String urlSite){
         List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
         for (searchengine.model.Site site: listsites){
             if(urlSite.contains(site.getUrl())){
