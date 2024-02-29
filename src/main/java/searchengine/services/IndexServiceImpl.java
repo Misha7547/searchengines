@@ -42,7 +42,6 @@ public class IndexServiceImpl implements IndexService {
     SitesList sitesList;
     @Autowired
     Lemmatisator lemmatisator;
-    private Document document;
     private Boolean isIndexingRun = true;
     ForkJoinPool forkJoinPool = new ForkJoinPool();
     private Boolean checkSite;
@@ -116,7 +115,7 @@ public class IndexServiceImpl implements IndexService {
     public Object getIndexPage(String html) throws IOException {
         Page page = new Page();
         searchengine.model.Site site = new searchengine.model.Site();
-        String contents = String.valueOf(document = Jsoup.connect(html).get());
+        String contents = String.valueOf(Jsoup.connect(html).get());
         site.setName(html);
         page.setSiteId(site);
         page.setPath(html);

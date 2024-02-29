@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 @Repository
 public class Lemmatisator {
 
-    private HashMap<String, Integer> wordsMap;
 
     private final LuceneMorphology luceneMorph = new RussianLuceneMorphology();
 
@@ -30,7 +29,7 @@ public class Lemmatisator {
     }
 
     public Map<String, Integer> lemmatisator(String offer){
-
+        HashMap<String, Integer> wordsMap;
         wordsMap = new HashMap<>();
         String text = offer.trim();
         String[] words = text.toLowerCase().split(REGEXP_TEXT);

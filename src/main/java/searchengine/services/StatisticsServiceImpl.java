@@ -37,7 +37,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     private String statusSite = null;
     private String errorSite = null;
     private long dateMillis = 0;
-    private Date date;
     private int idI;
 
     @Override
@@ -105,6 +104,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     private void infoSite(String urlSite){
+        Date date;
         List<searchengine.model.Site> listsites = (List<searchengine.model.Site>) siteRepository.findAll();
         for (searchengine.model.Site site: listsites){
             if(urlSite.contains(site.getUrl())){
