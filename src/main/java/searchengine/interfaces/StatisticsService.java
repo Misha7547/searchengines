@@ -1,4 +1,4 @@
-package searchengine.repository;
+package searchengine.interfaces;
 
 import searchengine.dto.statistics.StatisticsResponse;
 

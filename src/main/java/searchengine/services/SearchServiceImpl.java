@@ -20,7 +20,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Data
-public class SearchService {
+public class SearchServiceImpl implements searchengine.interfaces.SearchService {
 
 
     @Autowired

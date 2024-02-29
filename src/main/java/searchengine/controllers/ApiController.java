@@ -4,9 +4,9 @@ package searchengine.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.repository.IndexService;
-import searchengine.repository.StatisticsService;
-import searchengine.services.SearchService;
+import searchengine.interfaces.IndexService;
+import searchengine.interfaces.StatisticsService;
+import searchengine.services.SearchServiceImpl;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
@@ -19,10 +19,10 @@ public class ApiController {
 
     private final StatisticsService statisticsService;
     private final IndexService indexService;
-    private final SearchService searchService;
+    private final SearchServiceImpl searchService;
 
 
-    public ApiController(StatisticsService statisticsService, IndexService indexService, SearchService searchService) {
+    public ApiController(StatisticsService statisticsService, IndexService indexService, SearchServiceImpl searchService) {
         this.statisticsService = statisticsService;
         this.indexService = indexService;
         this.searchService = searchService;

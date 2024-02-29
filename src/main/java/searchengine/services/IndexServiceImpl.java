@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.ResultParseIndex;
+import searchengine.interfaces.IndexService;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.model.Page;
