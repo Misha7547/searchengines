@@ -61,18 +61,7 @@ public class ParseUrl extends RecursiveAction {
                             .referrer("http://www.google.com")
                             .get();
                     Elements postUrl = document.select("a");
-                    for (Element post : postUrl) {
-                        String linksChildren = post.attr("abs:href");
-                        if (!link.contains(linksChildren)
-                                && !linksChildren.contains(url)) {
-                            links.add(linksChildren);
-                            String path = linksChildren.replaceAll(url, " ");
-                            int code = urlCode(linksChildren);
-                            setPage(path, code, String.valueOf(document), pageRepository, url,
-                                    site, siteRepository, lemmaRepository, indexRepository, name);
-                            if (!indexRun) wait();
-                        }
-                    }
+                    parsElement(postUrl, link, links, document);
                 }
             }
         } else join();
@@ -89,9 +78,7 @@ public class ParseUrl extends RecursiveAction {
         return code;
     }
 
-    private void setPage(String path, int code, String content, PageRepository pageRepository,
-                         String url, Site site, SiteRepository siteRepository, LemmaRepository lemmaRepository,
-                         IndexRepository indexRepository, String name) throws IOException {
+    private void setPage(String path, int code, String content) throws IOException {
         Lemmatisator lemmatisator = new Lemmatisator();
         Page page = new Page();
         try {
@@ -105,7 +92,7 @@ public class ParseUrl extends RecursiveAction {
             String clearTegs = lemmatisator.clearingTags(path);
             wordsMap = lemmatisator.lemmatisator(clearTegs);
             for (String key : wordsMap.keySet()) {
-                setLemma(lemmaRepository, key, site, page, wordsMap.get(key), indexRepository);
+                setLemma(key, page, wordsMap.get(key));
             }
         } catch (Exception e) {
             site.setName(name);
@@ -117,7 +104,7 @@ public class ParseUrl extends RecursiveAction {
         }
     }
 
-    private void indexSet(Lemma lemma, Page page, IndexRepository indexRepository, int i) {
+    private void indexSet(Lemma lemma, Page page, int i) {
         Index index = new Index();
         index.setRank(i);
         index.setLemmaId(lemma);
@@ -125,7 +112,7 @@ public class ParseUrl extends RecursiveAction {
         indexRepository.save(index);
     }
 
-    private void setLemma(LemmaRepository lemmaRepository, String key, Site site, Page page, int i, IndexRepository indexRepository) {
+    private void setLemma(String key, Page page, int i) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
         boolean сheck = true;
         if (listLemmas.isEmpty()) {
@@ -134,14 +121,14 @@ public class ParseUrl extends RecursiveAction {
             lemma.setLemma(key);
             lemma.setFrequency(1);
             lemmaRepository.save(lemma);
-            indexSet(lemma, page, indexRepository, i);
+            indexSet(lemma, page, i);
         } else {
             for (Lemma lemma : listLemmas) {
                 if (key.equals(lemma.getLemma())) {
                     Lemma lemmaSave = lemmaRepository.findById(lemma.getId()).orElseThrow();
                     lemmaSave.setFrequency(lemma.getFrequency() + 1);
                     lemmaRepository.save(lemmaSave);
-                    indexSet(lemmaSave, page, indexRepository, i);
+                    indexSet(lemmaSave, page, i);
                     сheck = false;
                     break;
                 }
@@ -152,7 +139,23 @@ public class ParseUrl extends RecursiveAction {
                 lemmas.setLemma(key);
                 lemmas.setFrequency(1);
                 lemmaRepository.save(lemmas);
-                indexSet(lemmas, page, indexRepository, i);
+                indexSet(lemmas, page, i);
+            }
+        }
+    }
+
+    private void parsElement(Elements postUrl, String link, CopyOnWriteArrayList<String> links, Document document)
+            throws IOException {
+
+        for (Element post : postUrl) {
+            String linksChildren = post.attr("abs:href");
+            if (!link.contains(linksChildren)
+                    && !linksChildren.contains(url)) {
+                links.add(linksChildren);
+                String path = linksChildren.replaceAll(url, " ");
+                int code = urlCode(linksChildren);
+                setPage(path, code, String.valueOf(document));
+                if (!indexRun) join();
             }
         }
     }
