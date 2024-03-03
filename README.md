@@ -63,23 +63,24 @@ jsoup
 Для преобразования слов в леммы неообходимо подключение зависимостей morph, morphology, dictionary-reader, english, russianиз источника : org.apache.lucene.morphology необходимо ещё создать (либо отредактировать если он имеется - в Windows он располагается в директории C:/Users/<Имя вашего пользователя>/.m2) файл settings.xml, в котором указать токен для получения данных из публичного репозитория. В файл нужно внести следующие строки:
 
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
  https://maven.apache.org/xsd/settings-1.0.0.xsd">
 
-<servers>
-    <server>
-      <id>skillbox-gitlab</id>
-      <configuration>
-        <httpHeaders>
-          <property>
-            <name>Private-Token</name>
-            <value>wtb5axJDFX9Vm_W1Lexg</value>
-          </property>
-        </httpHeaders>
-      </configuration>
-    </server>
-  </servers>
+    <servers>
+        <server>
+            <id>github</id>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>Bearer 
+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</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
+        </server>
+    </servers>
 </settings>
 
 ### Запуск
