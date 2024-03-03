@@ -7,7 +7,6 @@ import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import searchengine.dto.statistics.DateResponse;
 import searchengine.dto.statistics.ResultSearch;
-import searchengine.interfaces.SearchService;
 import searchengine.model.Index;
 import searchengine.model.Lemma;
 import searchengine.repository.IndexRepository;

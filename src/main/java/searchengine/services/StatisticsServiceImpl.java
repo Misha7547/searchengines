@@ -13,7 +13,6 @@ import searchengine.model.Page;
 import searchengine.repository.LemmaRepository;
 import searchengine.repository.PageRepository;
 import searchengine.repository.SiteRepository;
-import searchengine.interfaces.StatisticsService;
 
 
 import java.util.ArrayList;

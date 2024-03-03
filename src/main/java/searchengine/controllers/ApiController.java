@@ -4,8 +4,8 @@ package searchengine.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchengine.dto.statistics.StatisticsResponse;
-import searchengine.interfaces.IndexService;
-import searchengine.interfaces.StatisticsService;
+import searchengine.services.IndexService;
+import searchengine.services.StatisticsService;
 import searchengine.services.SearchServiceImpl;
 
 import javax.xml.parsers.ParserConfigurationException;
