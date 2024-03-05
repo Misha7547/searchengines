@@ -114,7 +114,7 @@ public class ParseUrl extends RecursiveAction {
 
     private void setLemma(String key, Page page, int i) {
         List<Lemma> listLemmas = (List<Lemma>) lemmaRepository.findAll();
-        boolean сheck = true;
+        boolean check = true;
         if (listLemmas.isEmpty()) {
             Lemma lemma = new Lemma();
             lemma.setSiteByLemma(site);
@@ -129,11 +129,11 @@ public class ParseUrl extends RecursiveAction {
                     lemmaSave.setFrequency(lemma.getFrequency() + 1);
                     lemmaRepository.save(lemmaSave);
                     indexSet(lemmaSave, page, i);
-                    сheck = false;
+                    check = false;
                     break;
                 }
             }
-            if (сheck) {
+            if (check) {
                 Lemma lemmas = new Lemma();
                 lemmas.setSiteByLemma(site);
                 lemmas.setLemma(key);

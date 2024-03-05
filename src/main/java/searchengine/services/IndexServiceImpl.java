@@ -41,10 +41,10 @@ public class IndexServiceImpl implements IndexService {
     @Override
     public Object startIndexing() {
         isIndexingRun = true;
-        pageRepository.deleteAll();
-        siteRepository.deleteAll();
-        lemmaRepository.deleteAll();
         indexRepository.deleteAll();
+        pageRepository.deleteAll();
+        lemmaRepository.deleteAll();
+        siteRepository.deleteAll();
 
         ResultParseIndex resultParseIndex = new ResultParseIndex();
         resultParseIndex.setResult(isIndexingRun);
